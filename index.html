@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinTrack Pro — Premium Personal Finance Management System</title>
+  <meta name="description" content="Manage income, expenses, budgets, savings goals, and investments in one premium glassmorphic dashboard.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/dark-theme.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/grid.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/navbar.css">
+  <link rel="stylesheet" href="assets/css/animations.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ==========================================
+       PRELOADER
+       ========================================== -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <!-- ==========================================
+       NAVBAR
+       ========================================== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="index.html" class="navbar-brand">
+        <i data-lucide="wallet"></i>
+        <span>FinTrack <span class="text-gradient">Pro</span></span>
+      </a>
+      <div class="navbar-nav">
+        <a href="#hero" class="nav-link active">Home</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#testimonials" class="nav-link">Testimonials</a>
+        <a href="#faq" class="nav-link">FAQ</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </div>
+      <div class="navbar-actions">
+        <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
+          <i data-lucide="moon" class="moon-icon"></i>
+          <i data-lucide="sun" class="sun-icon"></i>
+        </button>
+        <a href="pages/login.html" class="btn btn-secondary btn-sm">Log In</a>
+        <a href="pages/signup.html" class="btn btn-primary btn-sm">Get Started</a>
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open Mobile Menu">
+          <i data-lucide="menu"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer Overlay Menu -->
+  <div class="mobile-nav-panel" id="mobileNavPanel">
+    <div class="mobile-nav-header">
+      <a href="index.html" class="navbar-brand">
+        <i data-lucide="wallet"></i>
+        <span>FinTrack Pro</span>
+      </a>
+      <button class="close-btn" id="mobileMenuClose" aria-label="Close Mobile Menu">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="mobile-nav-links">
+      <a href="#hero" class="nav-link">Home</a>
+      <a href="#about" class="nav-link">About</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#testimonials" class="nav-link">Testimonials</a>
+      <a href="#faq" class="nav-link">FAQ</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </div>
+    <div class="mobile-nav-actions">
+      <a href="pages/login.html" class="btn btn-secondary">Log In</a>
+      <a href="pages/signup.html" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       HERO SECTION
+       ========================================== -->
+  <section class="hero-section" id="hero" style="padding-top: 160px; padding-bottom: 6rem; overflow: hidden;">
+    <!-- Animated background mesh -->
+    <div class="floating-mesh-container">
+      <div class="mesh-blob mesh-blob-1"></div>
+      <div class="mesh-blob mesh-blob-2"></div>
+    </div>
+
+    <div class="container">
+      <div class="grid-12 align-center">
+        <!-- Hero Text content -->
+        <div class="col-12 col-lg-6 reveal">
+          <div class="badge badge-primary" style="margin-bottom: 1.5rem;">
+            <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i>
+            Empowering Your Financial Future
+          </div>
+          <h1 style="margin-bottom: 1.5rem; font-size: calc(var(--fs-4xl) * 0.9); line-height: 1.1;">
+            Take Control of Your Money. <br>
+            <span class="text-gradient typing-effect" data-words='["Track Expenses.", "Manage Budgets.", "Grow Wealth."]'>Track Expenses.</span>
+          </h1>
+          <p style="font-size: var(--fs-md); margin-bottom: 2.5rem; max-width: 520px;">
+            FinTrack Pro combines clean, premium glassmorphism interfaces with smart analytics to help you monitor cash flows, budgets, and investments in one secure place.
+          </p>
+          <div class="d-flex gap-3 hero-buttons" style="margin-bottom: 3.5rem;">
+            <a href="pages/signup.html" class="btn btn-primary btn-lg">Get Started Free <i data-lucide="arrow-right"></i></a>
+            <a href="#preview" class="btn btn-secondary btn-lg">View Live Mockup</a>
+          </div>
+          
+          <!-- Animated Stats counters -->
+          <div class="d-flex gap-4 hero-stats-wrapper" style="border-top: 1px solid var(--border-color); padding-top: 2rem;">
+            <div>
+              <div class="stat-counter counter-currency" data-target="150000" style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; color: var(--color-primary);">₹0</div>
+              <div style="font-size: var(--fs-xs); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">Avg. Monthly Savings</div>
+            </div>
+            <div style="border-left: 1px solid var(--border-color); padding-left: 2rem;">
+              <div class="stat-counter" data-target="10420" style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; color: var(--color-primary);">0</div>
+              <div style="font-size: var(--fs-xs); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">Active Users</div>
+            </div>
+            <div style="border-left: 1px solid var(--border-color); padding-left: 2rem;">
+              <div class="stat-counter counter-percent" data-target="98" style="font-family: var(--font-display); font-size: var(--fs-2xl); font-weight: 800; color: var(--color-primary);">0%</div>
+              <div style="font-size: var(--fs-xs); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; margin-top: 0.25rem;">Accuracy Index</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hero Illustration -->
+        <div class="col-12 col-lg-6 reveal-right delay-2">
+          <div class="card-glass flex-center" style="padding: 1.5rem; border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-xl);">
+            <!-- Interactive Finance Vector illustration -->
+            <svg viewBox="0 0 500 380" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
+              <!-- Grid background -->
+              <defs>
+                <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#6366f1" />
+                  <stop offset="100%" stop-color="#8b5cf6" />
+                </linearGradient>
+                <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#10b981" />
+                  <stop offset="100%" stop-color="#059669" />
+                </linearGradient>
+                <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="rgba(255,255,255,0.15)" />
+                  <stop offset="100%" stop-color="rgba(255,255,255,0.02)" />
+                </linearGradient>
+              </defs>
+              <!-- Sparkles and circles -->
+              <circle cx="80" cy="90" r="40" fill="url(#primaryGrad)" opacity="0.15" />
+              <circle cx="420" cy="300" r="50" fill="#ec4899" opacity="0.1" />
+              <!-- Graphic trend lines -->
+              <path d="M 50,300 L 120,250 L 190,280 L 260,180 L 330,220 L 400,100 L 450,130" stroke="url(#primaryGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M 50,300 L 120,250 L 190,280 L 260,180 L 330,220 L 400,100 L 450,130 L 450,320 L 50,320 Z" fill="url(#primaryGrad)" opacity="0.05" />
+              <!-- Green secondary growth curve -->
+              <path d="M 50,260 L 120,220 L 190,200 L 260,140 L 330,150 L 400,80 L 450,50" stroke="url(#greenGrad)" stroke-dasharray="6,4" stroke-width="2.5" stroke-linecap="round" />
+              
+              <!-- Floating Glass Cards Mockups inside illustration -->
+              <rect x="240" y="80" width="180" height="90" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" style="backdrop-filter: blur(10px);" />
+              <circle cx="280" cy="125" r="18" fill="url(#greenGrad)" />
+              <path d="M 276,125 L 279,122 L 284,127" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="310" y="120" fill="currentColor" font-family="Outfit" font-size="14" font-weight="700">Salary Credited</text>
+              <text x="310" y="140" fill="currentColor" opacity="0.6" font-family="Plus Jakarta Sans" font-size="11">+₹84,500.00</text>
+              
+              <rect x="60" y="180" width="160" height="80" rx="16" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" style="backdrop-filter: blur(10px);" />
+              <circle cx="95" cy="220" r="18" fill="#ef4444" opacity="0.8" />
+              <path d="M 91,222 L 99,214 M 99,214 L 94,214 M 99,214 L 99,219" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="125" y="215" fill="currentColor" font-family="Outfit" font-size="13" font-weight="700">Rent Paid</text>
+              <text x="125" y="233" fill="currentColor" opacity="0.6" font-family="Plus Jakarta Sans" font-size="10">-₹22,000.00</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       ABOUT FINTRACK PRO
+       ========================================== -->
+  <section id="about" style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="grid-12 align-center">
+        <!-- Visual Illustration left -->
+        <div class="col-12 col-lg-5 reveal-left">
+          <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
+            <!-- Circular rings -->
+            <circle cx="200" cy="200" r="160" stroke="var(--border-color)" stroke-width="2" />
+            <circle cx="200" cy="200" r="120" stroke="var(--color-primary-light)" stroke-width="1" stroke-dasharray="5 5" />
+            
+            <!-- Pie Graph pieces -->
+            <path d="M 200,200 L 200,50 A 150,150 0 0,1 320,120 Z" fill="url(#primaryGrad)" opacity="0.85" />
+            <path d="M 200,200 L 320,120 A 150,150 0 0,1 250,335 Z" fill="#ec4899" opacity="0.8" />
+            <path d="M 200,200 L 250,335 A 150,150 0 0,1 70,270 Z" fill="url(#greenGrad)" opacity="0.8" />
+            <path d="M 200,200 L 70,270 A 150,150 0 0,1 200,50 Z" fill="#f59e0b" opacity="0.85" />
+            <!-- Inner cutout ring for donut effect -->
+            <circle cx="200" cy="200" r="80" fill="var(--bg-secondary)" />
+            <!-- Centered value -->
+            <text x="200" y="195" text-anchor="middle" fill="currentColor" font-family="Outfit" font-size="18" font-weight="700">Total Outflow</text>
+            <text x="200" y="218" text-anchor="middle" fill="var(--color-primary)" font-family="Outfit" font-size="22" font-weight="800">₹45,230</text>
+          </svg>
+        </div>
+
+        <!-- Description right -->
+        <div class="col-12 col-lg-7 reveal delay-2">
+          <div class="badge badge-success" style="margin-bottom: 1.5rem;">ABOUT THE PLATFORM</div>
+          <h2 style="margin-bottom: 1.5rem; font-weight: 700; line-height: 1.2;">
+            A Smart Ecosystem to Align <br>Your Financial Decisions
+          </h2>
+          <p style="margin-bottom: 1.5rem;">
+            FinTrack Pro is engineered specifically to consolidate your scattered financial habits. Instead of auditing physical sheets, ledger notebooks, and multiple banking apps, we offer a clean digital ledger structured with high accessibility protocols.
+          </p>
+          <p style="margin-bottom: 2rem;">
+            Enjoy automatic budget overrun alerts, projected savings calendars based on monthly trajectories, and complete profit/loss breakdowns of investment holdings across stocks, gold, and crypto assets.
+          </p>
+          
+          <div class="grid-12 gap-3">
+            <div class="col-12 col-md-6 d-flex align-center gap-2">
+              <i data-lucide="shield-check" class="text-success" style="flex-shrink: 0; width: 24px; height: 24px;"></i>
+              <span style="font-weight: 600; font-size: var(--fs-sm);">Bank-grade Security Protocols</span>
+            </div>
+            <div class="col-12 col-md-6 d-flex align-center gap-2">
+              <i data-lucide="bell-ring" class="text-success" style="flex-shrink: 0; width: 24px; height: 24px;"></i>
+              <span style="font-weight: 600; font-size: var(--fs-sm);">Proactive Bill & Overrun Alerts</span>
+            </div>
+            <div class="col-12 col-md-6 d-flex align-center gap-2">
+              <i data-lucide="download" class="text-success" style="flex-shrink: 0; width: 24px; height: 24px;"></i>
+              <span style="font-weight: 600; font-size: var(--fs-sm);">Exportable PDF & CSV Reports</span>
+            </div>
+            <div class="col-12 col-md-6 d-flex align-center gap-2">
+              <i data-lucide="gauge" class="text-success" style="flex-shrink: 0; width: 24px; height: 24px;"></i>
+              <span style="font-weight: 600; font-size: var(--fs-sm);">High-performance Charts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       FEATURES SECTION
+       ========================================== -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge badge-primary" style="margin-bottom: 1rem;">FEATURES</div>
+        <h2>High-Octane Features Built for Builders</h2>
+        <p>Everything you need to monitor, control, and optimize your cash flows, budgets, and investments in one beautiful interface.</p>
+      </div>
+
+      <div class="grid-12">
+        <!-- Feature 1 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-1">
+          <div class="card-glass card-feature">
+            <div class="feature-icon-wrapper">
+              <i data-lucide="wallet"></i>
+            </div>
+            <h3>Income & Expense Tracking</h3>
+            <p>Add, edit, or delete cash inflows and categorized outflows. Attach digital receipts for audit and log descriptions instantly.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-2">
+          <div class="card-glass card-feature">
+            <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #10b981, #059669);">
+              <i data-lucide="piggy-bank"></i>
+            </div>
+            <h3>Smart Monthly Budgets</h3>
+            <p>Set caps on food, fuel, or rent. Get automated progress bars and triggers at 50%, 75%, and 90% threshold limits.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-3">
+          <div class="card-glass card-feature">
+            <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #ec4899, #d946ef);">
+              <i data-lucide="target"></i>
+            </div>
+            <h3>Savings Trajectories</h3>
+            <p>Define targets for laptops or travel. Track progress bars and projected dates of completion based on average savings speeds.</p>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-1">
+          <div class="card-glass card-feature">
+            <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+              <i data-lucide="line-chart"></i>
+            </div>
+            <h3>Investment Portfolios</h3>
+            <p>Track stocks, bonds, and crypto. Monitor real-time calculated ROI (Return on Investment) and total profit/loss margins.</p>
+          </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-2">
+          <div class="card-glass card-feature">
+            <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+              <i data-lucide="landmark"></i>
+            </div>
+            <h3>Loan & EMI Trackers</h3>
+            <p>Audit educational or home loans. Keep schedules of upcoming EMI deadlines and trace reduction metrics on repayments.</p>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-3">
+          <div class="card-glass card-feature">
+            <div class="feature-icon-wrapper" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+              <i data-lucide="calendar-check"></i>
+            </div>
+            <h3>Active Bill Reminders</h3>
+            <p>Log utility invoices. Receive notification bubbles x days before due dates so you never pay late fine fees.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       WHY CHOOSE FINTRACK PRO
+       ========================================== -->
+  <section style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge badge-success" style="margin-bottom: 1rem;">WHY FINTRACK PRO</div>
+        <h2>Designed to Overcome Spreadsheet Fatigue</h2>
+        <p>No clunky formula setups, no formatting glitches, and no platform lockdowns. Enjoy a premium ecosystem structured for maximum ease.</p>
+      </div>
+
+      <div class="grid-12">
+        <div class="col-12 col-md-6 reveal-left">
+          <div class="card-glass" style="height: 100%;">
+            <div class="d-flex align-center gap-3" style="margin-bottom: 1.25rem;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background-color: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="zap"></i>
+              </div>
+              <h4 style="font-weight: 700;">Sub-2-Second Rendering</h4>
+            </div>
+            <p>Our dashboard aggregates database indexes in real time, delivering loading responses within milliseconds even with high transaction histories.</p>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-6 reveal-right">
+          <div class="card-glass" style="height: 100%;">
+            <div class="d-flex align-center gap-3" style="margin-bottom: 1.25rem;">
+              <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background-color: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="refresh-cw"></i>
+              </div>
+              <h4 style="font-weight: 700;">Instant Device Syncing</h4>
+            </div>
+            <p>Manage expenses on the go from your mobile device and open your desktop panel to find immediate synchronization matching database logs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       DASHBOARD PREVIEW SECTION (LAPTOP MOCKUP)
+       ========================================== -->
+  <section id="preview">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge badge-primary" style="margin-bottom: 1rem;">LIVE PREVIEW</div>
+        <h2>Sleek Dashboard Mockup</h2>
+        <p>Preview the unified user dashboard layout featuring glassmorphism cards and clean responsive grids.</p>
+      </div>
+
+      <div class="grid-12 justify-center">
+        <div class="col-12 col-lg-10 reveal">
+          <!-- Premium Laptop Mockup frame using pure CSS/HTML -->
+          <div class="card-glass" style="padding: 0.5rem; border-radius: var(--radius-lg); background-color: #27272a; box-shadow: var(--shadow-xl); border-color: #3f3f46;">
+            <!-- Inner screen -->
+            <div style="background-color: var(--bg-primary); border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-color); aspect-ratio: 16/9; position: relative;">
+              
+              <!-- Screen Top bar -->
+              <div style="height: 36px; background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 1rem; gap: 0.5rem;">
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #f87171;"></span>
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #fbbf24;"></span>
+                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #34d399;"></span>
+                <span style="margin-left: 2rem; font-size: 10px; opacity: 0.5; font-family: var(--font-sans);">dashboard.fintrackpro.com</span>
+              </div>
+
+              <!-- Animated screenshot content (mocking dashboard preview) -->
+              <div style="padding: 1.5rem; height: calc(100% - 36px); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+                <!-- Row 1: Greeting + Stat cards -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                  <div>
+                    <h5 style="font-family: var(--font-display); font-weight: 700; margin: 0; font-size: var(--fs-md);">Overview Dashboard</h5>
+                    <span style="font-size: 10px; opacity: 0.6;">Welcome back, John Doe</span>
+                  </div>
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;">JD</div>
+                </div>
+
+                <div class="grid-12" style="gap: 0.75rem;">
+                  <div class="col-4">
+                    <div class="card-glass" style="padding: 0.75rem; border-radius: var(--radius-sm);">
+                      <div style="font-size: 9px; opacity: 0.6; text-transform: uppercase;">Total Balance</div>
+                      <div style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 800; margin-top: 0.25rem;">₹4,23,500</div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="card-glass" style="padding: 0.75rem; border-radius: var(--radius-sm);">
+                      <div style="font-size: 9px; opacity: 0.6; text-transform: uppercase;">Expenses (June)</div>
+                      <div style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 800; margin-top: 0.25rem; color: var(--color-danger);">₹18,420</div>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="card-glass" style="padding: 0.75rem; border-radius: var(--radius-sm);">
+                      <div style="font-size: 9px; opacity: 0.6; text-transform: uppercase;">Savings Progress</div>
+                      <div style="font-family: var(--font-display); font-size: var(--fs-md); font-weight: 800; margin-top: 0.25rem; color: var(--color-success);">82%</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Row 2: Mock Chart visual -->
+                <div class="card-glass" style="flex: 1; margin-top: 1rem; padding: 1rem; border-radius: var(--radius-sm); display: flex; flex-direction: column; justify-content: space-between;">
+                  <div style="font-size: 10px; font-weight: 600;">Cash Flow Analytics (Monthly Trends)</div>
+                  <!-- Mock bars -->
+                  <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 80px; padding-top: 1rem;">
+                    <div style="width: 25px; height: 40px; background-color: var(--color-primary); border-radius: 3px 3px 0 0;"></div>
+                    <div style="width: 25px; height: 60px; background-color: var(--color-primary-end); border-radius: 3px 3px 0 0;"></div>
+                    <div style="width: 25px; height: 50px; background-color: var(--color-primary); border-radius: 3px 3px 0 0;"></div>
+                    <div style="width: 25px; height: 80px; background-color: var(--color-primary-end); border-radius: 3px 3px 0 0; box-shadow: var(--shadow-glow);"></div>
+                    <div style="width: 25px; height: 65px; background-color: var(--color-primary); border-radius: 3px 3px 0 0;"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       STATISTICS SECTION (ADDITIONAL COUNTERS)
+       ========================================== -->
+  <section style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="grid-12 text-center">
+        <div class="col-12 col-md-3 reveal">
+          <div class="stat-counter" data-target="99.9" style="font-family: var(--font-display); font-size: var(--fs-4xl); font-weight: 800; color: var(--color-primary);">0</div>
+          <p style="font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; margin-top: 0.5rem; letter-spacing: 0.05em;">Server Uptime</p>
+        </div>
+        <div class="col-12 col-md-3 reveal delay-1">
+          <div class="stat-counter counter-percent" data-target="86" style="font-family: var(--font-display); font-size: var(--fs-4xl); font-weight: 800; color: var(--color-primary);">0%</div>
+          <p style="font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; margin-top: 0.5rem; letter-spacing: 0.05em;">Wealth Optimization</p>
+        </div>
+        <div class="col-12 col-md-3 reveal delay-2">
+          <div class="stat-counter" data-target="24" style="font-family: var(--font-display); font-size: var(--fs-4xl); font-weight: 800; color: var(--color-primary);">0</div>
+          <p style="font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; margin-top: 0.5rem; letter-spacing: 0.05em;">Support SLA (Hours)</p>
+        </div>
+        <div class="col-12 col-md-3 reveal delay-3">
+          <div class="stat-counter" data-target="4" style="font-family: var(--font-display); font-size: var(--fs-4xl); font-weight: 800; color: var(--color-primary);">0</div>
+          <p style="font-weight: 600; font-size: var(--fs-sm); text-transform: uppercase; margin-top: 0.5rem; letter-spacing: 0.05em;">Audit Awards</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       TESTIMONIALS SECTION
+       ========================================== -->
+  <section id="testimonials">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge badge-primary" style="margin-bottom: 1rem;">TESTIMONIALS</div>
+        <h2>Acclaimed by Users Globally</h2>
+        <p>Hear what finance experts, working freelancers, and college students say about their experience using FinTrack Pro.</p>
+      </div>
+
+      <div class="grid-12">
+        <!-- Testimonial 1 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-1">
+          <div class="card-glass d-flex flex-column justify-between" style="height: 100%;">
+            <p style="font-style: italic; font-size: var(--fs-sm); line-height: 1.7; margin-bottom: 2rem;">
+              "FinTrack Pro shifted my budgeting logic entirely. I used to run complex macros on Excel which frequently crashed. The automated threshold notifications on this platform prevent budget leaks automatically."
+            </p>
+            <div class="d-flex align-center gap-3">
+              <div class="avatar">
+                <span class="avatar-initials">SP</span>
+              </div>
+              <div>
+                <h5 style="font-size: var(--fs-sm); font-weight: 700; margin: 0;">Sarah Parker</h5>
+                <span style="font-size: var(--fs-xs); opacity: 0.6;">Senior Product Analyst</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-2">
+          <div class="card-glass d-flex flex-column justify-between" style="height: 100%;">
+            <p style="font-style: italic; font-size: var(--fs-sm); line-height: 1.7; margin-bottom: 2rem;">
+              "I love the glassmorphic aesthetics. It actually makes monitoring expenses fun. The design feels like Stripe or Linear, very minimal, elegant, and blazing fast on my phone. The investment ROI calculator is super handy!"
+            </p>
+            <div class="d-flex align-center gap-3">
+              <div class="avatar">
+                <span class="avatar-initials">AK</span>
+              </div>
+              <div>
+                <h5 style="font-size: var(--fs-sm); font-weight: 700; margin: 0;">Alex Kapoor</h5>
+                <span style="font-size: var(--fs-xs); opacity: 0.6;">Freelance Full-Stack Developer</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="col-12 col-md-6 col-lg-4 reveal delay-3">
+          <div class="card-glass d-flex flex-column justify-between" style="height: 100%;">
+            <p style="font-style: italic; font-size: var(--fs-sm); line-height: 1.7; margin-bottom: 2rem;">
+              "The 6-digit verification code flows, the password strength indicator checkmarks checklist, and the overall form input animations are extremely premium. FinTrack Pro feels like a multi-million SaaS."
+            </p>
+            <div class="d-flex align-center gap-3">
+              <div class="avatar">
+                <span class="avatar-initials">EM</span>
+              </div>
+              <div>
+                <h5 style="font-size: var(--fs-sm); font-weight: 700; margin: 0;">Elena Moore</h5>
+                <span style="font-size: var(--fs-xs); opacity: 0.6;">Fintech Graduate Student</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       FAQ SECTION (ACCORDION)
+       ========================================== -->
+  <section id="faq" style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge badge-success" style="margin-bottom: 1rem;">FAQ</div>
+        <h2>Frequently Asked Questions</h2>
+        <p>Find answers to common questions about the platform, security, and future integrations.</p>
+      </div>
+
+      <div class="grid-12 justify-center">
+        <div class="col-12 col-lg-8 reveal">
+          <!-- Accordion 1 -->
+          <div class="card-glass" style="margin-bottom: 1rem; padding: 1.25rem;">
+            <details style="cursor: pointer;">
+              <summary style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); display: flex; justify-content: space-between; align-items: center; list-style: none;">
+                Is my data secure on FinTrack Pro?
+                <i data-lucide="chevron-down" style="width: 18px; height: 18px; opacity: 0.6;"></i>
+              </summary>
+              <p style="margin-top: 1rem; font-size: var(--fs-sm); margin-bottom: 0;">
+                Yes, absolutely. For Phase 1 we have implemented rigid client validations. For Phase 2, a secure PostgreSQL database layout with hashed passwords, parameterized PDO prepared SQL statements, and strict user ownership filtering rules will safeguard your assets from any malicious extraction.
+              </p>
+            </details>
+          </div>
+
+          <!-- Accordion 2 -->
+          <div class="card-glass" style="margin-bottom: 1rem; padding: 1.25rem;">
+            <details style="cursor: pointer;">
+              <summary style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); display: flex; justify-content: space-between; align-items: center; list-style: none;">
+                Can I export reports in Excel or CSV format?
+                <i data-lucide="chevron-down" style="width: 18px; height: 18px; opacity: 0.6;"></i>
+              </summary>
+              <p style="margin-top: 1rem; font-size: var(--fs-sm); margin-bottom: 0;">
+                Yes. Under the Reports tab, users will be able to export custom range transactions. Our Phase 2 system supports exports to clean PDF documents, Excel spreadsheets, and raw CSV files, making third-party tax filings completely seamless.
+              </p>
+            </details>
+          </div>
+
+          <!-- Accordion 3 -->
+          <div class="card-glass" style="padding: 1.25rem;">
+            <details style="cursor: pointer;">
+              <summary style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md); display: flex; justify-content: space-between; align-items: center; list-style: none;">
+                Does this require any paid membership subscription?
+                <i data-lucide="chevron-down" style="width: 18px; height: 18px; opacity: 0.6;"></i>
+              </summary>
+              <p style="margin-top: 1rem; font-size: var(--fs-sm); margin-bottom: 0;">
+                No, this is built as a self-hosted open-source personal application suitable for local deployment. You can host it yourself using XAMPP or Docker with zero ongoing operational costs.
+              </p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       CONTACT SECTION
+       ========================================== -->
+  <section id="contact">
+    <div class="container">
+      <div class="section-header reveal">
+        <div class="badge badge-primary" style="margin-bottom: 1rem;">CONTACT</div>
+        <h2>Reach Out for Assistance</h2>
+        <p>Have questions about setting up your XAMPP or custom MySQL servers? Fill out the form below and we'll reply shortly.</p>
+      </div>
+
+      <div class="grid-12 justify-center">
+        <div class="col-12 col-lg-8 reveal">
+          <div class="card-glass">
+            <form id="contactForm" data-valid="true">
+              <div class="grid-12">
+                <div class="col-12 col-md-6 form-group">
+                  <label class="form-label" for="contactName">Full Name</label>
+                  <div class="form-control-wrapper">
+                    <i data-lucide="user"></i>
+                    <input type="text" id="contactName" name="name" class="form-control has-icon" placeholder="John Doe" required>
+                  </div>
+                </div>
+                <div class="col-12 col-md-6 form-group">
+                  <label class="form-label" for="contactEmail">Email Address</label>
+                  <div class="form-control-wrapper">
+                    <i data-lucide="mail"></i>
+                    <input type="email" id="contactEmail" name="email" class="form-control has-icon" placeholder="john@example.com" required>
+                  </div>
+                </div>
+                <div class="col-12 form-group">
+                  <label class="form-label" for="contactSubject">Subject</label>
+                  <div class="form-control-wrapper">
+                    <i data-lucide="info"></i>
+                    <input type="text" id="contactSubject" name="subject" class="form-control has-icon" placeholder="Setting up PostgreSQL database" required>
+                  </div>
+                </div>
+                <div class="col-12 form-group">
+                  <label class="form-label" for="contactMessage">Your Message</label>
+                  <textarea id="contactMessage" name="message" class="form-control" rows="5" placeholder="Write your message details..." required style="resize: none;"></textarea>
+                </div>
+                <div class="col-12 text-center" style="margin-top: 1rem;">
+                  <button type="submit" class="btn btn-primary" style="padding: 1rem 3rem;">Send Message <i data-lucide="send"></i></button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       FOOTER
+       ========================================== -->
+  <footer style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); padding: 4rem 0 2rem 0;">
+    <div class="container">
+      <div class="grid-12" style="margin-bottom: 3rem;">
+        <div class="col-12 col-md-4">
+          <a href="index.html" class="navbar-brand" style="margin-bottom: 1.5rem;">
+            <i data-lucide="wallet"></i>
+            <span>FinTrack <span class="text-gradient">Pro</span></span>
+          </a>
+          <p style="font-size: var(--fs-sm);">
+            A premium, highly secure finance management dashboard engineered for students, professionals, and small business owners.
+          </p>
+        </div>
+
+        <div class="col-6 col-md-2" style="grid-column-start: 7;">
+          <h5 style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 1.25rem;">Product</h5>
+          <ul style="display: flex; flex-direction: column; gap: 0.75rem; font-size: var(--fs-xs);">
+            <li><a href="#features" style="color: var(--text-secondary);">Features</a></li>
+            <li><a href="#preview" style="color: var(--text-secondary);">Live Demo</a></li>
+            <li><a href="#faq" style="color: var(--text-secondary);">FAQs</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-md-2">
+          <h5 style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 1.25rem;">Company</h5>
+          <ul style="display: flex; flex-direction: column; gap: 0.75rem; font-size: var(--fs-xs);">
+            <li><a href="#about" style="color: var(--text-secondary);">About Us</a></li>
+            <li><a href="#contact" style="color: var(--text-secondary);">Contact</a></li>
+            <li><a href="#" style="color: var(--text-secondary);">Privacy Policy</a></li>
+          </ul>
+        </div>
+
+        <div class="col-12 col-md-2">
+          <h5 style="font-size: var(--fs-sm); font-weight: 700; margin-bottom: 1.25rem;">Security</h5>
+          <ul style="display: flex; flex-direction: column; gap: 0.75rem; font-size: var(--fs-xs);">
+            <li class="d-flex align-center gap-1"><i data-lucide="shield" style="width: 12px; height: 12px; color: var(--color-success);"></i> <span>SSL Encrypted</span></li>
+            <li class="d-flex align-center gap-1"><i data-lucide="database" style="width: 12px; height: 12px; color: var(--color-success);"></i> <span>PDO Escaped</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid var(--border-color); padding-top: 2rem; display: flex; flex-direction: column; gap: 1rem; align-items: center; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-muted);" class="d-md-flex flex-md-row">
+        <div>© 2026 FinTrack Pro. All rights reserved. Developed as Final Year Project.</div>
+        <div class="d-flex gap-3">
+          <a href="#" class="btn btn-secondary btn-sm" style="padding: 0.5rem;"><i data-lucide="github"></i></a>
+          <a href="#" class="btn btn-secondary btn-sm" style="padding: 0.5rem;"><i data-lucide="twitter"></i></a>
+          <a href="#" class="btn btn-secondary btn-sm" style="padding: 0.5rem;"><i data-lucide="linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Entry Script -->
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

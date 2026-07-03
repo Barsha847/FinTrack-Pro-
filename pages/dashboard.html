@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — FinTrack Pro</title>
+  <meta name="description" content="Manage Income, Expenses, Budgets, Savings Goals and Investments.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+
+  <style>
+    /* Styling adjustments specifically for the dashboard mock elements */
+    @media (max-width: 1024px) {
+      /* Show mobile toggle in header on mobile */
+      #mobileSidebarToggle {
+        display: flex !important;
+      }
+    }
+  </style>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ==========================================
+       PRELOADER
+       ========================================== -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <!-- Dashboard Layout Wrapper -->
+  <div class="dashboard-layout">
+    
+    <!-- ==========================================
+         SIDEBAR COMPONENT
+         ========================================== -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Header Logo & Collapse Button -->
+      <div class="sidebar-header">
+        <a href="../index.html" class="sidebar-logo">
+          <i data-lucide="wallet"></i>
+          <span class="sidebar-logo-text">FinTrack <span class="text-gradient">Pro</span></span>
+        </a>
+        <button class="sidebar-toggle-trigger" id="sidebarToggle" aria-label="Toggle Sidebar">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable menu container -->
+      <div class="sidebar-nav-container">
+        <div class="sidebar-menu">
+          <div class="sidebar-menu-heading">Overview</div>
+          
+          <a href="dashboard.html" class="sidebar-menu-item active" data-tooltip="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="sidebar-menu-item-text">Dashboard</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Core Modules</div>
+
+          <a href="#income" class="sidebar-menu-item" data-tooltip="Income Tracking">
+            <i data-lucide="arrow-down-left"></i>
+            <span class="sidebar-menu-item-text">Income Tracking</span>
+          </a>
+
+          <a href="#expenses" class="sidebar-menu-item" data-tooltip="Expense Tracking">
+            <i data-lucide="arrow-up-right"></i>
+            <span class="sidebar-menu-item-text">Expenses</span>
+          </a>
+
+          <a href="#budgets" class="sidebar-menu-item" data-tooltip="Monthly Budgets">
+            <i data-lucide="piggy-bank"></i>
+            <span class="sidebar-menu-item-text">Budgets</span>
+          </a>
+
+          <a href="#savings" class="sidebar-menu-item" data-tooltip="Savings Goals">
+            <i data-lucide="target"></i>
+            <span class="sidebar-menu-item-text">Savings Goals</span>
+          </a>
+
+          <a href="#investments" class="sidebar-menu-item" data-tooltip="Investment Tracker">
+            <i data-lucide="trending-up"></i>
+            <span class="sidebar-menu-item-text">Investments</span>
+          </a>
+
+          <a href="#loans" class="sidebar-menu-item" data-tooltip="Loan / EMI Tracking">
+            <i data-lucide="landmark"></i>
+            <span class="sidebar-menu-item-text">Loans & EMI</span>
+          </a>
+
+          <a href="#bills" class="sidebar-menu-item" data-tooltip="Bill Reminders">
+            <i data-lucide="calendar-clock"></i>
+            <span class="sidebar-menu-item-text">Bill Reminders</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Reports & Settings</div>
+
+          <a href="#reports" class="sidebar-menu-item" data-tooltip="Export Reports">
+            <i data-lucide="file-text"></i>
+            <span class="sidebar-menu-item-text">Reports</span>
+          </a>
+
+          <a href="#settings" class="sidebar-menu-item" data-tooltip="Account Settings">
+            <i data-lucide="settings"></i>
+            <span class="sidebar-menu-item-text">Settings</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Sidebar footer profile -->
+      <div class="sidebar-footer">
+        <div class="avatar">
+          <span class="avatar-initials">JD</span>
+        </div>
+        <div class="sidebar-profile-info">
+          <span class="sidebar-profile-name">John Doe</span>
+          <span class="sidebar-profile-email">john.doe@example.com</span>
+        </div>
+        <button class="sidebar-logout-btn" id="sidebarLogout" data-tooltip="Log Out" aria-label="Log Out">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ==========================================
+         MAIN CONTENT AREA
+         ========================================== -->
+    <main class="dashboard-main">
+      
+      <!-- Dashboard Top Header -->
+      <header class="dashboard-header">
+        <div class="d-flex align-center gap-2">
+          <!-- Mobile Menu Toggler (hidden on desktop) -->
+          <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;" aria-label="Open Sidebar Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div>
+            <h2 style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl);">Overview Dashboard</h2>
+            <p style="font-size: var(--fs-xs); color: var(--text-secondary); margin: 0; margin-top: 0.15rem;">Real-time balance status sheet (Phase 1 Mockup)</p>
+          </div>
+        </div>
+        
+        <div class="d-flex align-center gap-3">
+          <!-- Theme toggle trigger button -->
+          <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
+            <i data-lucide="moon" class="moon-icon"></i>
+            <i data-lucide="sun" class="sun-icon"></i>
+          </button>
+          
+          <!-- User status badge -->
+          <div class="d-none d-md-flex align-center gap-2" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
+            <div class="avatar" style="width: 36px; height: 36px; font-size: 12px;">JD</div>
+            <div class="d-flex flex-column">
+              <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
+              <span style="font-size: 10px; color: var(--text-muted);">Standard Tier</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Grid Contents -->
+      <div class="dashboard-content reveal">
+        <!-- Row 1: Statistics Cards -->
+        <div class="grid-12" style="margin-bottom: 2rem;">
+          
+          <!-- Stats Card 1 -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Net Worth Balance</span>
+                <div class="stats-icon-wrapper">
+                  <i data-lucide="banknote"></i>
+                </div>
+              </div>
+              <div class="stats-value">₹4,82,930.00</div>
+              <div class="stats-change text-success">
+                <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
+                <span>+12.4% from last month</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Card 2 -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Income (June)</span>
+                <div class="stats-icon-wrapper" style="background-color: var(--color-success-light); color: var(--color-success);">
+                  <i data-lucide="arrow-down-circle"></i>
+                </div>
+              </div>
+              <div class="stats-value">₹95,200.00</div>
+              <div class="stats-change text-success">
+                <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
+                <span>₹8,500 additional freelancing</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Card 3 -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Expenses (June)</span>
+                <div class="stats-icon-wrapper" style="background-color: var(--color-danger-light); color: var(--color-danger);">
+                  <i data-lucide="arrow-up-circle"></i>
+                </div>
+              </div>
+              <div class="stats-value">₹32,450.00</div>
+              <div class="stats-change text-danger">
+                <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
+                <span>+4.2% on utility increments</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats Card 4 -->
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Budgets (Food)</span>
+                <div class="stats-icon-wrapper" style="background-color: var(--color-warning-light); color: var(--color-warning);">
+                  <i data-lucide="pie-chart"></i>
+                </div>
+              </div>
+              <div class="stats-value">₹4,230 remaining</div>
+              <div class="stats-change text-warning">
+                <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
+                <span>72% of budget used</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Row 2: Secondary Content Area -->
+        <div class="grid-12">
+          
+          <!-- Recent Transactions (List Panel) -->
+          <div class="col-12 col-lg-8">
+            <div class="card-glass" style="height: 100%;">
+              <div class="d-flex justify-between align-center" style="margin-bottom: 1.5rem;">
+                <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0;">Recent Transactions Ledger</h4>
+                <button class="btn btn-secondary btn-sm">View All Ledger</button>
+              </div>
+
+              <!-- Transactions list mock -->
+              <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <!-- Item 1 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-success-light); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                      <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                      <div style="font-size: var(--fs-sm); font-weight: 700;">Regular Salary Credited</div>
+                      <div style="font-size: 10px; color: var(--text-muted);">June 28, 2026 • Cash Inflow</div>
+                    </div>
+                  </div>
+                  <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-success);">+₹85,000.00</div>
+                </div>
+
+                <!-- Item 2 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-danger-light); color: var(--color-danger); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                      <i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                      <div style="font-size: var(--fs-sm); font-weight: 700;">Whole Foods Outflow</div>
+                      <div style="font-size: 10px; color: var(--text-muted);">June 27, 2026 • Grocery Outflow</div>
+                    </div>
+                  </div>
+                  <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-danger);">-₹4,520.00</div>
+                </div>
+
+                <!-- Item 3 -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                      <i data-lucide="cpu" style="width: 18px; height: 18px;"></i>
+                    </div>
+                    <div>
+                      <div style="font-size: var(--fs-sm); font-weight: 700;">AWS Cloud Hosting Invoice</div>
+                      <div style="font-size: 10px; color: var(--text-muted);">June 26, 2026 • Server Bills</div>
+                    </div>
+                  </div>
+                  <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-danger);">-₹1,850.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions & Budgets -->
+          <div class="col-12 col-lg-4">
+            <div class="card-glass d-flex flex-column justify-between" style="height: 100%;">
+              <div>
+                <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 1.5rem;">Ledger Actions</h4>
+                
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
+                  <button class="btn btn-primary" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
+                    <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i> Add Transaction Log
+                  </button>
+                  <button class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i> Download Statement Sheet
+                  </button>
+                </div>
+              </div>
+
+              <!-- Savings Progress Mock indicator -->
+              <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+                <div class="d-flex justify-between align-center" style="font-size: var(--fs-sm); font-weight: 600; margin-bottom: 0.5rem;">
+                  <span>Savings Goal: Laptop</span>
+                  <span class="text-gradient">84% Complete</span>
+                </div>
+                <div style="height: 8px; background-color: var(--bg-secondary); border-radius: var(--radius-full); overflow: hidden;">
+                  <div style="width: 84%; height: 100%; background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end)); border-radius: var(--radius-full); box-shadow: var(--shadow-glow);"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>

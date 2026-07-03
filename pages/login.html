@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log In — FinTrack Pro</title>
+  <meta name="description" content="Access your FinTrack Pro dashboard securely.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ==========================================
+       PRELOADER
+       ========================================== -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <!-- Auth Panel Container -->
+  <div class="auth-wrapper">
+    <!-- Floating Mesh blobs -->
+    <div class="auth-bg-shapes">
+      <div class="auth-shape auth-shape-1"></div>
+      <div class="auth-shape auth-shape-2"></div>
+    </div>
+
+    <!-- Theme Switch Absolute Button -->
+    <div style="position: absolute; top: 1.5rem; right: 1.5rem; z-index: var(--z-nav);">
+      <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
+        <i data-lucide="moon" class="moon-icon"></i>
+        <i data-lucide="sun" class="sun-icon"></i>
+      </button>
+    </div>
+
+    <!-- Auth Centered Card -->
+    <div class="auth-container reveal">
+      <!-- Back to Landing header -->
+      <div class="auth-logo">
+        <a href="../index.html" class="d-flex align-center justify-center gap-2" style="color: var(--text-primary);">
+          <i data-lucide="wallet" class="text-gradient" style="font-size: 2rem;"></i>
+          <span>FinTrack <span class="text-gradient">Pro</span></span>
+        </a>
+      </div>
+
+      <div class="card-glass">
+        <h3 style="font-weight: 700; text-align: center; margin-bottom: 0.5rem;">Welcome Back</h3>
+        <p style="text-align: center; font-size: var(--fs-sm); margin-bottom: 2rem;">Access your dashboard and reports</p>
+        
+        <form id="loginForm" method="POST" action="dashboard.html" novalidate>
+          
+          <!-- Email Input -->
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <div class="form-control-wrapper">
+              <i data-lucide="mail"></i>
+              <input type="email" id="loginEmail" name="email" class="form-control has-icon" placeholder="name@domain.com" required>
+            </div>
+            <div class="error-message"></div>
+          </div>
+
+          <!-- Password Input -->
+          <div class="form-group">
+            <div class="d-flex justify-between align-center" style="margin-bottom: 0.5rem;">
+              <label class="form-label" for="loginPassword" style="margin-bottom: 0;">Password</label>
+              <a href="forgot-password.html" style="font-size: var(--fs-xs); font-weight: 600;">Forgot password?</a>
+            </div>
+            <div class="form-control-wrapper">
+              <i data-lucide="lock"></i>
+              <input type="password" id="loginPassword" name="password" class="form-control has-icon has-suffix" placeholder="••••••••" required>
+              <button type="button" class="form-suffix-btn password-toggle-btn" aria-label="Toggle password visibility">
+                <i data-lucide="eye"></i>
+              </button>
+            </div>
+            <div class="error-message"></div>
+          </div>
+
+          <!-- Remember me checkbox -->
+          <div class="form-group d-flex justify-between align-center" style="margin-top: 1rem; margin-bottom: 1.5rem;">
+            <label class="form-check">
+              <input type="checkbox" name="remember" class="form-check-input">
+              <span>Remember me for 30 days</span>
+            </label>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; margin-bottom: 1.5rem;">
+            Log In <i data-lucide="log-in"></i>
+          </button>
+        </form>
+
+        <div style="text-align: center; font-size: var(--fs-sm); color: var(--text-secondary);">
+          Don't have an account? <a href="signup.html" style="font-weight: 600;">Create Account</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>
