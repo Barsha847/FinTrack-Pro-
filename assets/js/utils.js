@@ -105,3 +105,27 @@ export function initIcons() {
     window.lucide.createIcons();
   }
 }
+
+/**
+ * Dynamic system-wide Currency Formatter
+ * @param {number} amount Target value in INR (base)
+ */
+export function formatCurrency(amount) {
+  const currency = localStorage.getItem('fintrack_currency') || 'INR';
+  let converted = amount;
+  let symbol = '₹';
+
+  if (currency === 'USD') {
+    converted = amount * 0.012; // Example Exchange Rate: 1 INR = 0.012 USD
+    symbol = '$';
+  } else if (currency === 'EUR') {
+    converted = amount * 0.011; // Example Exchange Rate: 1 INR = 0.011 EUR
+    symbol = '€';
+  }
+
+  const locale = currency === 'INR' ? 'en-IN' : 'en-US';
+  return symbol + converted.toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}

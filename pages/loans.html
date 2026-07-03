@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loans & EMI Tracker — FinTrack Pro</title>
+  <meta name="description" content="Manage liabilities, interest rates, tenors and EMI schedules.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/navbar.css">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+
+  <style>
+    @media (max-width: 1024px) {
+      #mobileSidebarToggle { display: flex !important; }
+    }
+  </style>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <!-- Main Layout Wrapper -->
+  <div class="dashboard-layout loans-page-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="sidebar-logo">
+          <i data-lucide="wallet"></i>
+          <span class="sidebar-logo-text">FinTrack <span class="text-gradient">Pro</span></span>
+        </a>
+        <button class="sidebar-toggle-trigger" id="sidebarToggle" aria-label="Toggle Sidebar">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-nav-container">
+        <div class="sidebar-menu">
+          <div class="sidebar-menu-heading">Overview</div>
+          <a href="dashboard.html" class="sidebar-menu-item" data-tooltip="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="sidebar-menu-item-text">Dashboard</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Core Modules</div>
+          <a href="income.html" class="sidebar-menu-item" data-tooltip="Income Tracking">
+            <i data-lucide="arrow-down-left"></i>
+            <span class="sidebar-menu-item-text">Income Tracking</span>
+          </a>
+          <a href="expenses.html" class="sidebar-menu-item" data-tooltip="Expense Tracking">
+            <i data-lucide="arrow-up-right"></i>
+            <span class="sidebar-menu-item-text">Expenses</span>
+          </a>
+          <a href="budgets.html" class="sidebar-menu-item" data-tooltip="Monthly Budgets">
+            <i data-lucide="piggy-bank"></i>
+            <span class="sidebar-menu-item-text">Budgets</span>
+          </a>
+          <a href="savings.html" class="sidebar-menu-item" data-tooltip="Savings Goals">
+            <i data-lucide="target"></i>
+            <span class="sidebar-menu-item-text">Savings Goals</span>
+          </a>
+          <a href="investments.html" class="sidebar-menu-item" data-tooltip="Investment Tracker">
+            <i data-lucide="trending-up"></i>
+            <span class="sidebar-menu-item-text">Investments</span>
+          </a>
+          <a href="loans.html" class="sidebar-menu-item active" data-tooltip="Loan / EMI Tracking">
+            <i data-lucide="landmark"></i>
+            <span class="sidebar-menu-item-text">Loans & EMI</span>
+          </a>
+          <a href="bills.html" class="sidebar-menu-item" data-tooltip="Bill Reminders">
+            <i data-lucide="calendar-clock"></i>
+            <span class="sidebar-menu-item-text">Bill Reminders</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Reports & Settings</div>
+          <a href="reports.html" class="sidebar-menu-item" data-tooltip="Export Reports">
+            <i data-lucide="file-text"></i>
+            <span class="sidebar-menu-item-text">Reports</span>
+          </a>
+          <a href="settings.html" class="sidebar-menu-item" data-tooltip="Account Settings">
+            <i data-lucide="settings"></i>
+            <span class="sidebar-menu-item-text">Settings</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="avatar"><span class="avatar-initials">JD</span></div>
+        <div class="sidebar-profile-info">
+          <span class="sidebar-profile-name">John Doe</span>
+          <span class="sidebar-profile-email">john.doe@example.com</span>
+        </div>
+        <button class="sidebar-logout-btn" id="sidebarLogout" aria-label="Log Out"><i data-lucide="log-out"></i></button>
+      </div>
+    </aside>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="dashboard-main">
+      
+      <!-- HEADER -->
+      <header class="dashboard-header">
+        <div class="d-flex align-center gap-3" style="flex: 1;">
+          <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;" aria-label="Open Sidebar Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="search-bar-container">
+            <input type="text" id="dashboardSearchInput" class="search-bar-input" placeholder="Search loans...">
+            <i data-lucide="search"></i>
+          </div>
+        </div>
+        
+        <div class="d-flex align-center gap-3">
+          <button class="theme-toggle-btn" id="pageRefreshBtn" aria-label="Refresh Data">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+          
+          <div class="dropdown-wrapper">
+            <button class="theme-toggle-btn notification-trigger" id="notificationTriggerBtn" aria-label="Notifications">
+              <i data-lucide="bell"></i>
+              <span class="notification-badge-dot" id="notificationBadgeDot" style="display: none;"></span>
+            </button>
+            <div class="dropdown-menu" id="notificationDropdown">
+              <div class="dropdown-header">
+                <h4>Alert Notifications</h4>
+              </div>
+              <div class="notification-list" id="notificationsContainer"></div>
+            </div>
+          </div>
+          
+          <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
+            <i data-lucide="moon" class="moon-icon"></i>
+            <i data-lucide="sun" class="sun-icon"></i>
+          </button>
+          
+          <div class="dropdown-wrapper" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
+            <div class="d-flex align-center gap-2" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
+              <div class="avatar" style="width: 36px; height: 36px;">JD</div>
+              <div class="d-none d-md-flex flex-column">
+                <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
+                <span style="font-size: 10px; color: var(--text-muted);">Standard Tier</span>
+              </div>
+            </div>
+            <div class="dropdown-menu" id="profileDropdown" style="width: 200px;">
+              <div class="profile-menu-links">
+                <a href="#profile" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
+                <a href="login.html" class="profile-menu-link logout"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- METRICS & TABLES -->
+      <div class="dashboard-content reveal">
+        
+        <!-- ROW 1: STAT CARDS -->
+        <div class="grid-12" style="margin-bottom: 2rem;">
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span>Active Loan Accounts</span>
+                <div class="stats-icon-wrapper" style="background-color: var(--color-danger-light); color: var(--color-danger);"><i data-lucide="landmark"></i></div>
+              </div>
+              <div class="stats-value" id="activeLoansVal">0 Accounts</div>
+              <div class="stats-change">Liabilities active</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span>Principal remaining</span>
+                <div class="stats-icon-wrapper"><i data-lucide="banknote"></i></div>
+              </div>
+              <div class="stats-value" id="loansPrincipalVal">₹0.00</div>
+              <div class="stats-change text-danger">Total outstanding balance</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span>Monthly EMIs Sum</span>
+                <div class="stats-icon-wrapper" style="background-color: var(--color-warning-light); color: var(--color-warning);"><i data-lucide="calendar"></i></div>
+              </div>
+              <div class="stats-value" id="nextEmiVal">₹0.00</div>
+              <div class="stats-change">Cumulative monthly outflow</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-6 col-xl-3">
+            <div class="card-glass card-stats">
+              <div class="stats-header">
+                <span>Amortized Paid Progress</span>
+                <div class="stats-icon-wrapper" style="background-color: var(--color-success-light); color: var(--color-success);"><i data-lucide="percent"></i></div>
+              </div>
+              <div class="stats-value" id="loansPaidVal">0%</div>
+              <div class="stats-change text-success">Average principal cleared</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROW 2: FILTERS & TABLE -->
+        <div class="grid-12">
+          <div class="col-12">
+            <div class="card-glass" style="padding: 1.5rem;">
+              
+              <!-- Toolbar -->
+              <div class="d-flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <div style="flex: 1;">
+                  <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0;">Loan Amortization List</h4>
+                </div>
+                <button class="btn btn-primary" id="openAddLoanModalBtn">
+                  <i data-lucide="plus-circle" style="width: 16px; height: 16px;"></i> Log Loan Account
+                </button>
+              </div>
+
+              <!-- Main Table Structure -->
+              <div style="width: 100%; overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: var(--fs-xs);" class="table-responsive">
+                  <thead>
+                    <tr style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
+                      <th style="padding: 1rem 1.25rem; font-weight: 700;">Lender / Loan Type</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Principal (INR)</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Rate %</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">EMI (INR)</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: center;">Term (Months)</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: center; width: 25%;">Installments Cleared</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: center;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBodyContainer">
+                    <!-- Populated dynamically by loans.js -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Pagination Footer -->
+              <div class="d-flex justify-between align-center" style="margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                <span style="font-size: var(--fs-xs); color: var(--text-muted);" id="paginationInfo">Showing 1-10 of 10 items</span>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-secondary btn-sm" id="prevPageBtn" disabled>Previous</button>
+                  <button class="btn btn-secondary btn-sm" id="nextPageBtn" disabled>Next</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <!-- ADD/EDIT MODAL -->
+  <div class="modal-backdrop" id="loanModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Log Loan Account Details</h4>
+        <button class="toast-close" id="closeModalBtn" aria-label="Close modal"><i data-lucide="x"></i></button>
+      </div>
+      <form id="loanForm">
+        <input type="hidden" id="loanId">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="loanLender">Lender / Description</label>
+            <div class="form-control-wrapper">
+              <i data-lucide="edit-3"></i>
+              <input type="text" id="loanLender" class="form-control has-icon" placeholder="e.g. SBI Education Loan" required>
+            </div>
+          </div>
+          <div class="grid-12">
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="loanPrincipal">Principal Amount (INR)</label>
+              <div class="form-control-wrapper">
+                <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
+                <input type="number" id="loanPrincipal" class="form-control has-icon" placeholder="300000.00" step="0.01" min="0.01" required>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="loanRate">Interest Rate % (Per Annum)</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="percent"></i>
+                <input type="number" id="loanRate" class="form-control has-icon" placeholder="8.5" step="0.01" min="0.01" required>
+              </div>
+            </div>
+          </div>
+          <div class="grid-12">
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="loanEmi">Monthly EMI (INR)</label>
+              <div class="form-control-wrapper">
+                <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
+                <input type="number" id="loanEmi" class="form-control has-icon" placeholder="8500.00" step="0.01" min="0.01" required>
+              </div>
+            </div>
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="loanTenor">Tenor (Months)</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="calendar"></i>
+                <input type="number" id="loanTenor" class="form-control has-icon" placeholder="36" min="1" required>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loanPaidMonths">Paid Installments (Months)</label>
+            <div class="form-control-wrapper">
+              <i data-lucide="check-circle"></i>
+              <input type="number" id="loanPaidMonths" class="form-control has-icon" placeholder="12" min="0" defaultValue="0" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Loan Account <i data-lucide="check"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>

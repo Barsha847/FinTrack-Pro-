@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Export Reports — FinTrack Pro</title>
+  <meta name="description" content="Generate and download spreadsheet records.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/navbar.css">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+
+  <style>
+    @media (max-width: 1024px) {
+      #mobileSidebarToggle { display: flex !important; }
+    }
+  </style>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <!-- Main Layout Wrapper -->
+  <div class="dashboard-layout reports-page-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="sidebar-logo">
+          <i data-lucide="wallet"></i>
+          <span class="sidebar-logo-text">FinTrack <span class="text-gradient">Pro</span></span>
+        </a>
+        <button class="sidebar-toggle-trigger" id="sidebarToggle" aria-label="Toggle Sidebar">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-nav-container">
+        <div class="sidebar-menu">
+          <div class="sidebar-menu-heading">Overview</div>
+          <a href="dashboard.html" class="sidebar-menu-item" data-tooltip="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="sidebar-menu-item-text">Dashboard</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Core Modules</div>
+          <a href="income.html" class="sidebar-menu-item" data-tooltip="Income Tracking">
+            <i data-lucide="arrow-down-left"></i>
+            <span class="sidebar-menu-item-text">Income Tracking</span>
+          </a>
+          <a href="expenses.html" class="sidebar-menu-item" data-tooltip="Expense Tracking">
+            <i data-lucide="arrow-up-right"></i>
+            <span class="sidebar-menu-item-text">Expenses</span>
+          </a>
+          <a href="budgets.html" class="sidebar-menu-item" data-tooltip="Monthly Budgets">
+            <i data-lucide="piggy-bank"></i>
+            <span class="sidebar-menu-item-text">Budgets</span>
+          </a>
+          <a href="savings.html" class="sidebar-menu-item" data-tooltip="Savings Goals">
+            <i data-lucide="target"></i>
+            <span class="sidebar-menu-item-text">Savings Goals</span>
+          </a>
+          <a href="investments.html" class="sidebar-menu-item" data-tooltip="Investment Tracker">
+            <i data-lucide="trending-up"></i>
+            <span class="sidebar-menu-item-text">Investments</span>
+          </a>
+          <a href="loans.html" class="sidebar-menu-item" data-tooltip="Loan / EMI Tracking">
+            <i data-lucide="landmark"></i>
+            <span class="sidebar-menu-item-text">Loans & EMI</span>
+          </a>
+          <a href="bills.html" class="sidebar-menu-item" data-tooltip="Bill Reminders">
+            <i data-lucide="calendar-clock"></i>
+            <span class="sidebar-menu-item-text">Bill Reminders</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Reports & Settings</div>
+          <a href="reports.html" class="sidebar-menu-item active" data-tooltip="Export Reports">
+            <i data-lucide="file-text"></i>
+            <span class="sidebar-menu-item-text">Reports</span>
+          </a>
+          <a href="settings.html" class="sidebar-menu-item" data-tooltip="Account Settings">
+            <i data-lucide="settings"></i>
+            <span class="sidebar-menu-item-text">Settings</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="avatar"><span class="avatar-initials">JD</span></div>
+        <div class="sidebar-profile-info">
+          <span class="sidebar-profile-name">John Doe</span>
+          <span class="sidebar-profile-email">john.doe@example.com</span>
+        </div>
+        <button class="sidebar-logout-btn" id="sidebarLogout" aria-label="Log Out"><i data-lucide="log-out"></i></button>
+      </div>
+    </aside>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="dashboard-main">
+      
+      <!-- HEADER -->
+      <header class="dashboard-header">
+        <div class="d-flex align-center gap-3" style="flex: 1;">
+          <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;" aria-label="Open Sidebar Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div class="search-bar-container">
+            <input type="text" id="dashboardSearchInput" class="search-bar-input" placeholder="Search reports..." disabled>
+            <i data-lucide="search"></i>
+          </div>
+        </div>
+        
+        <div class="d-flex align-center gap-3">
+          <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
+            <i data-lucide="moon" class="moon-icon"></i>
+            <i data-lucide="sun" class="sun-icon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- REPORT CONTROLS -->
+      <div class="dashboard-content reveal">
+        <div class="grid-12">
+          <div class="col-12 col-md-8 col-lg-6" style="margin: 0 auto;">
+            <div class="card-glass" style="padding: 2rem;">
+              <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 1.5rem; text-align: center;">Export Transaction Logs</h4>
+              
+              <!-- Range -->
+              <div class="form-group">
+                <label class="form-label" for="reportDateRange">Date Filter Boundary</label>
+                <div class="form-control-wrapper">
+                  <i data-lucide="calendar"></i>
+                  <select id="reportDateRange" class="form-control has-icon" style="cursor: pointer;">
+                    <option value="all">All Time Records</option>
+                    <option value="30days">Last 30 Days</option>
+                    <option value="90days">Last 90 Days</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Format -->
+              <div class="form-group">
+                <label class="form-label" for="reportFormat">Export Layout Format</label>
+                <div class="form-control-wrapper">
+                  <i data-lucide="file-type"></i>
+                  <select id="reportFormat" class="form-control has-icon" style="cursor: pointer;">
+                    <option value="csv">CSV Spreadsheet (.csv)</option>
+                    <option value="json">JSON Data Schema (.json)</option>
+                    <option value="pdf">Print Ready Document (.pdf)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Button -->
+              <button class="btn btn-primary" id="initiateExportBtn" style="width: 100%; margin-top: 1.5rem; justify-content: center;">
+                Generate Report File <i data-lucide="download" style="width: 16px; height: 16px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>

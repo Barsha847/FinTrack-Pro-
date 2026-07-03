@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schedule Calendar — FinTrack Pro</title>
+  <meta name="description" content="View bill due dates and scheduled EMIs in a monthly timeline.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/navbar.css">
+  <link rel="stylesheet" href="../assets/css/sidebar.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+
+  <style>
+    @media (max-width: 1024px) {
+      #mobileSidebarToggle { display: flex !important; }
+    }
+    
+    /* Calendar styles */
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background-color: var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .calendar-day-header {
+      background-color: var(--bg-secondary);
+      padding: 0.75rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: var(--fs-xs);
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .calendar-day {
+      background-color: var(--bg-card);
+      min-height: 80px;
+      padding: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background-color var(--motion-hover);
+    }
+
+    .calendar-day:hover {
+      background-color: var(--bg-secondary);
+    }
+
+    .calendar-day.blank {
+      background-color: var(--bg-secondary);
+      opacity: 0.5;
+    }
+
+    .day-number {
+      font-weight: 700;
+      font-size: var(--fs-xs);
+      color: var(--text-secondary);
+    }
+
+    .day-events-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      margin-top: 0.25rem;
+    }
+
+    .event-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      position: relative;
+    }
+
+    .event-dot.dot-bill { background-color: var(--color-danger); }
+    .event-dot.dot-emi { background-color: var(--color-warning); }
+
+    /* Custom tooltip styling for calendar dots */
+    .event-dot[data-tooltip]::before {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-5px);
+      background-color: rgba(9, 9, 11, 0.95);
+      color: #fff;
+      font-size: 9px;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+      z-index: 10;
+      box-shadow: var(--shadow-md);
+    }
+
+    .event-dot[data-tooltip]:hover::before {
+      opacity: 1;
+    }
+  </style>
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <!-- Main Layout Wrapper -->
+  <div class="dashboard-layout calendar-page-layout">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="sidebar-logo">
+          <i data-lucide="wallet"></i>
+          <span class="sidebar-logo-text">FinTrack <span class="text-gradient">Pro</span></span>
+        </a>
+        <button class="sidebar-toggle-trigger" id="sidebarToggle" aria-label="Toggle Sidebar">
+          <i data-lucide="chevron-left"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-nav-container">
+        <div class="sidebar-menu">
+          <div class="sidebar-menu-heading">Overview</div>
+          <a href="dashboard.html" class="sidebar-menu-item" data-tooltip="Dashboard">
+            <i data-lucide="layout-dashboard"></i>
+            <span class="sidebar-menu-item-text">Dashboard</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Core Modules</div>
+          <a href="income.html" class="sidebar-menu-item" data-tooltip="Income Tracking">
+            <i data-lucide="arrow-down-left"></i>
+            <span class="sidebar-menu-item-text">Income Tracking</span>
+          </a>
+          <a href="expenses.html" class="sidebar-menu-item" data-tooltip="Expense Tracking">
+            <i data-lucide="arrow-up-right"></i>
+            <span class="sidebar-menu-item-text">Expenses</span>
+          </a>
+          <a href="budgets.html" class="sidebar-menu-item" data-tooltip="Monthly Budgets">
+            <i data-lucide="piggy-bank"></i>
+            <span class="sidebar-menu-item-text">Budgets</span>
+          </a>
+          <a href="savings.html" class="sidebar-menu-item" data-tooltip="Savings Goals">
+            <i data-lucide="target"></i>
+            <span class="sidebar-menu-item-text">Savings Goals</span>
+          </a>
+          <a href="investments.html" class="sidebar-menu-item" data-tooltip="Investment Tracker">
+            <i data-lucide="trending-up"></i>
+            <span class="sidebar-menu-item-text">Investments</span>
+          </a>
+          <a href="loans.html" class="sidebar-menu-item" data-tooltip="Loan / EMI Tracking">
+            <i data-lucide="landmark"></i>
+            <span class="sidebar-menu-item-text">Loans & EMI</span>
+          </a>
+          <a href="bills.html" class="sidebar-menu-item" data-tooltip="Bill Reminders">
+            <i data-lucide="calendar-clock"></i>
+            <span class="sidebar-menu-item-text">Bill Reminders</span>
+          </a>
+
+          <div class="sidebar-menu-heading">Reports & Settings</div>
+          <a href="reports.html" class="sidebar-menu-item" data-tooltip="Export Reports">
+            <i data-lucide="file-text"></i>
+            <span class="sidebar-menu-item-text">Reports</span>
+          </a>
+          <a href="settings.html" class="sidebar-menu-item" data-tooltip="Account Settings">
+            <i data-lucide="settings"></i>
+            <span class="sidebar-menu-item-text">Settings</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="avatar"><span class="avatar-initials">JD</span></div>
+        <div class="sidebar-profile-info">
+          <span class="sidebar-profile-name">John Doe</span>
+          <span class="sidebar-profile-email">john.doe@example.com</span>
+        </div>
+        <button class="sidebar-logout-btn" id="sidebarLogout" aria-label="Log Out"><i data-lucide="log-out"></i></button>
+      </div>
+    </aside>
+
+    <!-- CONTENT CONTAINER -->
+    <main class="dashboard-main">
+      
+      <!-- HEADER -->
+      <header class="dashboard-header">
+        <div class="d-flex align-center gap-3" style="flex: 1;">
+          <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;" aria-label="Open Sidebar Drawer">
+            <i data-lucide="menu"></i>
+          </button>
+          <div style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-md);" id="calendarMonthYear">July 2026</div>
+        </div>
+        
+        <div class="d-flex align-center gap-3">
+          <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
+            <i data-lucide="moon" class="moon-icon"></i>
+            <i data-lucide="sun" class="sun-icon"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- CALENDAR GRID -->
+      <div class="dashboard-content reveal">
+        <div class="grid-12">
+          <div class="col-12">
+            <div class="card-glass" style="padding: 1.5rem;">
+              
+              <!-- Week headers -->
+              <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; margin-bottom: 0.5rem;">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+              </div>
+
+              <!-- Days Grid loaded by JS -->
+              <div id="calendarDaysGrid" class="calendar-grid">
+                <!-- Days populated dynamically by calendar.js -->
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>

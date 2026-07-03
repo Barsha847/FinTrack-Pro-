@@ -9,6 +9,19 @@ import { initValidation } from './validation.js';
 import { initAnimations } from './animation.js';
 import { initRipples, initIcons } from './utils.js';
 import { initDashboard } from './dashboard.js';
+import { initIncomePage } from './income.js';
+import { initExpensesPage } from './expenses.js';
+import { initBudgetsPage } from './budgets.js';
+import { initSavingsPage } from './savings.js';
+import { initInvestmentsPage } from './investments.js';
+import { initLoansPage } from './loans.js';
+import { initBillsPage } from './bills.js';
+import { initAnalyticsPage } from './analytics.js';
+import { initReportsPage } from './reports.js';
+import { initNotificationsPage } from './notifications.js';
+import { initCalendarPage } from './calendar.js';
+import { initProfilePage } from './profile.js';
+import { initSettingsPage } from './settings.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize all subsystems
@@ -19,9 +32,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initAnimations();
   initRipples();
   initIcons();
+  
+  // Dashboard & Finance Modules
   initDashboard();
+  initIncomePage();
+  initExpensesPage();
+  initBudgetsPage();
+  initSavingsPage();
+  initInvestmentsPage();
+  initLoansPage();
+  initBillsPage();
 
-  // Initialize Navbar Mobile Drawer (specific to landing index.html)
+  // Final Modules (Phase 4)
+  initAnalyticsPage();
+  initReportsPage();
+  initNotificationsPage();
+  initCalendarPage();
+  initProfilePage();
+  initSettingsPage();
+
+  // Initialize Navbar Mobile Drawer (landing index.html page specific)
   initMobileNavbar();
 });
 
@@ -54,7 +84,6 @@ function initMobileNavbar() {
   if (closeBtn) closeBtn.addEventListener('click', closeMenu);
   backdrop.addEventListener('click', closeMenu);
 
-  // Close menu drawer if a page anchor link is clicked
   const drawerLinks = drawer.querySelectorAll('.nav-link');
   drawerLinks.forEach(link => {
     link.addEventListener('click', closeMenu);
