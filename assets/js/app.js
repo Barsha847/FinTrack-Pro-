@@ -8,6 +8,7 @@ import { initNavigation } from './navigation.js';
 import { initValidation } from './validation.js';
 import { initAnimations } from './animation.js';
 import { initRipples, initIcons } from './utils.js';
+import { initDashboard } from './dashboard.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize all subsystems
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAnimations();
   initRipples();
   initIcons();
+  initDashboard();
 
   // Initialize Navbar Mobile Drawer (specific to landing index.html)
   initMobileNavbar();

@@ -13,17 +13,60 @@
   <link rel="stylesheet" href="../assets/css/grid.css">
   <link rel="stylesheet" href="../assets/css/layout.css">
   <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/navbar.css">
   <link rel="stylesheet" href="../assets/css/sidebar.css">
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
 
   <style>
-    /* Styling adjustments specifically for the dashboard mock elements */
+    /* Styling adjustments specifically for the dashboard components */
     @media (max-width: 1024px) {
-      /* Show mobile toggle in header on mobile */
       #mobileSidebarToggle {
         display: flex !important;
       }
+    }
+
+    /* Style for transaction items */
+    .transaction-feed-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--border-color);
+      transition: background-color var(--motion-hover);
+    }
+    
+    .transaction-feed-item:last-child {
+      border-bottom: none;
+    }
+
+    .transaction-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .transaction-title {
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .transaction-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .transaction-amount {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: var(--fs-sm);
     }
   </style>
 
@@ -139,32 +182,86 @@
          ========================================== -->
     <main class="dashboard-main">
       
-      <!-- Dashboard Top Header -->
+      <!-- Dashboard Top Header (Navbar) -->
       <header class="dashboard-header">
-        <div class="d-flex align-center gap-2">
+        <div class="d-flex align-center gap-3" style="flex: 1;">
           <!-- Mobile Menu Toggler (hidden on desktop) -->
           <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;" aria-label="Open Sidebar Drawer">
             <i data-lucide="menu"></i>
           </button>
-          <div>
-            <h2 style="font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl);">Overview Dashboard</h2>
-            <p style="font-size: var(--fs-xs); color: var(--text-secondary); margin: 0; margin-top: 0.15rem;">Real-time balance status sheet (Phase 1 Mockup)</p>
+          
+          <!-- Search Bar -->
+          <div class="search-bar-container">
+            <input type="text" id="dashboardSearchInput" class="search-bar-input" placeholder="Search transactions...">
+            <i data-lucide="search"></i>
           </div>
         </div>
         
         <div class="d-flex align-center gap-3">
-          <!-- Theme toggle trigger button -->
+          <!-- Refresh Simulator Button -->
+          <button class="theme-toggle-btn" id="dashboardRefreshBtn" aria-label="Refresh Dashboard Metrics" style="transition: transform var(--motion-hover);">
+            <i data-lucide="refresh-cw"></i>
+          </button>
+
+          <!-- Notification Trigger and Dropdown -->
+          <div class="dropdown-wrapper">
+            <button class="theme-toggle-btn notification-trigger" id="notificationTriggerBtn" aria-label="Notifications">
+              <i data-lucide="bell"></i>
+              <span class="notification-badge-dot" id="notificationBadgeDot" style="display: none;"></span>
+            </button>
+            
+            <!-- Notifications Dropdown Menu Card -->
+            <div class="dropdown-menu" id="notificationDropdown">
+              <div class="dropdown-header">
+                <h4>Alert Notifications</h4>
+                <span class="badge badge-primary" style="font-size: 9px; font-weight: 700;">Live Logs</span>
+              </div>
+              <div class="notification-list" id="notificationsContainer">
+                <!-- Loaded dynamically by dashboard.js -->
+              </div>
+              <div class="dropdown-footer">
+                <a href="#notifications" style="font-weight: 700;">View All Notifications</a>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Theme Toggle Trigger -->
           <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
             <i data-lucide="moon" class="moon-icon"></i>
             <i data-lucide="sun" class="sun-icon"></i>
           </button>
           
-          <!-- User status badge -->
-          <div class="d-none d-md-flex align-center gap-2" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
-            <div class="avatar" style="width: 36px; height: 36px; font-size: 12px;">JD</div>
-            <div class="d-flex flex-column">
-              <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
-              <span style="font-size: 10px; color: var(--text-muted);">Standard Tier</span>
+          <!-- User Profile Dropdown Badge -->
+          <div class="dropdown-wrapper" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
+            <div class="d-flex align-center gap-2" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
+              <div class="avatar" style="width: 36px; height: 36px; font-size: 12px; font-weight: 700;">JD</div>
+              <div class="d-none d-md-flex flex-column">
+                <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
+                <span style="font-size: 10px; color: var(--text-muted);">Standard Tier</span>
+              </div>
+            </div>
+
+            <!-- Profile Dropdown options -->
+            <div class="dropdown-menu" id="profileDropdown" style="width: 220px;">
+              <div class="profile-menu-info">
+                <div class="avatar" style="width: 40px; height: 40px; font-size: 14px; font-weight: 700;">JD</div>
+                <div>
+                  <div style="font-weight: 700; font-size: var(--fs-sm); color: var(--text-primary);">John Doe</div>
+                  <div style="font-size: 10px; color: var(--text-muted);">john@example.com</div>
+                </div>
+              </div>
+              <div class="profile-menu-links">
+                <a href="#profile" class="profile-menu-link">
+                  <i data-lucide="user" style="width: 16px; height: 16px;"></i> My Profile
+                </a>
+                <a href="#settings" class="profile-menu-link">
+                  <i data-lucide="settings" style="width: 16px; height: 16px;"></i> Settings
+                </a>
+                <div style="border-top: 1px solid var(--border-color); margin: 0.25rem 0;"></div>
+                <a href="login.html" class="profile-menu-link logout">
+                  <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -184,7 +281,7 @@
                   <i data-lucide="banknote"></i>
                 </div>
               </div>
-              <div class="stats-value">₹4,82,930.00</div>
+              <div class="stats-value" id="totalBalance">₹4,82,930.00</div>
               <div class="stats-change text-success">
                 <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
                 <span>+12.4% from last month</span>
@@ -196,15 +293,15 @@
           <div class="col-12 col-md-6 col-xl-3">
             <div class="card-glass card-stats">
               <div class="stats-header">
-                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Income (June)</span>
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Total Inflows</span>
                 <div class="stats-icon-wrapper" style="background-color: var(--color-success-light); color: var(--color-success);">
                   <i data-lucide="arrow-down-circle"></i>
                 </div>
               </div>
-              <div class="stats-value">₹95,200.00</div>
+              <div class="stats-value" id="totalIncome">₹95,200.00</div>
               <div class="stats-change text-success">
                 <i data-lucide="plus" style="width: 14px; height: 14px;"></i>
-                <span>₹8,500 additional freelancing</span>
+                <span>Dynamic transaction logs</span>
               </div>
             </div>
           </div>
@@ -213,15 +310,15 @@
           <div class="col-12 col-md-6 col-xl-3">
             <div class="card-glass card-stats">
               <div class="stats-header">
-                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Expenses (June)</span>
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Total Outflows</span>
                 <div class="stats-icon-wrapper" style="background-color: var(--color-danger-light); color: var(--color-danger);">
                   <i data-lucide="arrow-up-circle"></i>
                 </div>
               </div>
-              <div class="stats-value">₹32,450.00</div>
+              <div class="stats-value" id="totalExpense">₹32,450.00</div>
               <div class="stats-change text-danger">
                 <i data-lucide="trending-up" style="width: 14px; height: 14px;"></i>
-                <span>+4.2% on utility increments</span>
+                <span>Utility and grocery bills</span>
               </div>
             </div>
           </div>
@@ -230,103 +327,218 @@
           <div class="col-12 col-md-6 col-xl-3">
             <div class="card-glass card-stats">
               <div class="stats-header">
-                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Budgets (Food)</span>
+                <span style="font-size: var(--fs-xs); font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Savings Progress</span>
                 <div class="stats-icon-wrapper" style="background-color: var(--color-warning-light); color: var(--color-warning);">
                   <i data-lucide="pie-chart"></i>
                 </div>
               </div>
-              <div class="stats-value">₹4,230 remaining</div>
+              <div class="stats-value" id="savingsGoalPct">84% Complete</div>
               <div class="stats-change text-warning">
                 <i data-lucide="alert-circle" style="width: 14px; height: 14px;"></i>
-                <span>72% of budget used</span>
+                <span>Target laptop savings goal</span>
               </div>
             </div>
           </div>
 
         </div>
 
-        <!-- Row 2: Secondary Content Area -->
+        <!-- Row 2: Visual Chart representation -->
+        <div class="grid-12" style="margin-bottom: 2rem;">
+          <div class="col-12">
+            <div class="card-glass cashflow-analytics-card" style="padding: 1.5rem;">
+              <div class="grid-12">
+                
+                <!-- Left Side: Cash Flow Summary & Insights (33% width on desktop) -->
+                <div class="col-12 col-lg-4 cashflow-analytics-left">
+                  <div style="margin-bottom: 1.25rem;">
+                    <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0; font-size: var(--fs-md);">Cash Flow Analytics</h4>
+                    <span style="font-size: 10px; color: var(--text-muted);">Inflow vs Outflow monthly overview</span>
+                  </div>
+
+                  <!-- Summary KPI Card -->
+                  <div style="background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1rem; position: relative;">
+                    <div class="cashflow-kpi-title">Net Cash Flow</div>
+                    <div class="d-flex align-center justify-between" style="margin-top: 0.25rem;">
+                      <span class="cashflow-kpi-value">+₹62,750.00</span>
+                      <span class="badge badge-success" style="font-size: 9px; font-weight: 700; padding: 0.2rem 0.5rem;"><i data-lucide="trending-up" style="width: 10px; height: 10px;"></i> +14.8%</span>
+                    </div>
+                  </div>
+
+                  <!-- Insight details -->
+                  <div class="cashflow-insight-list">
+                    <div class="cashflow-insight-item">
+                      <span class="cashflow-insight-label">Monthly Growth Rate</span>
+                      <span class="cashflow-insight-value text-success">+8.2%</span>
+                    </div>
+                    <div class="cashflow-insight-item">
+                      <span class="cashflow-insight-label">Savings Target Rate</span>
+                      <span class="cashflow-insight-value" style="color: var(--color-primary);">65.9%</span>
+                    </div>
+                    <div class="cashflow-insight-item">
+                      <span class="cashflow-insight-label">Financial Health Rating</span>
+                      <span class="cashflow-insight-value text-success">94/100</span>
+                    </div>
+                    <div style="border-top: 1px dashed var(--border-color); margin: 0.25rem 0;"></div>
+                    <div class="cashflow-insight-item">
+                      <span class="cashflow-insight-label">Peak Income Month</span>
+                      <span class="cashflow-insight-value">June (₹95.2k)</span>
+                    </div>
+                    <div class="cashflow-insight-item">
+                      <span class="cashflow-insight-label">Peak Spending Month</span>
+                      <span class="cashflow-insight-value">June (₹32.4k)</span>
+                    </div>
+                  </div>
+
+                  <!-- Tiny financial health helper -->
+                  <p style="font-size: 10px; color: var(--text-muted); line-height: 1.4; margin-top: 1.25rem; margin-bottom: 0;">
+                    * Outflows declined by 14.8% since May, boosting savings rate by 4.2%. Project targets are fully on-schedule.
+                  </p>
+                </div>
+
+                <!-- Right Side: Sharp SVG Chart (67% width on desktop) -->
+                <div class="col-12 col-lg-8" style="position: relative;">
+                  <!-- Legend to the top-right -->
+                  <div class="d-flex justify-end gap-2" style="position: absolute; top: -0.25rem; right: 0; z-index: var(--z-base);">
+                    <span class="badge badge-success" style="font-size: 9px; font-weight: 700; padding: 0.2rem 0.5rem; background-color: var(--color-success-light);"><i data-lucide="arrow-down-left" style="width: 10px; height: 10px; vertical-align: middle;"></i> Inflow</span>
+                    <span class="badge badge-primary" style="font-size: 9px; font-weight: 700; padding: 0.2rem 0.5rem; background-color: var(--color-primary-light);"><i data-lucide="arrow-up-right" style="width: 10px; height: 10px; vertical-align: middle;"></i> Outflow</span>
+                  </div>
+
+                  <!-- Target Chart Container -->
+                  <div style="width: 100%; height: 250px; position: relative; margin-top: 1.5rem; overflow: visible;">
+                    
+                    <!-- Redesigned SVG Graph: Sharp Lines, Minimal curves, low area opacity -->
+                    <svg viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%; overflow: visible;" id="cashflowSvg">
+                      <!-- Y-Axis horizontal helper lines only (minimal opacity) -->
+                      <line x1="20" y1="30" x2="480" y2="30" stroke="var(--border-color)" stroke-dasharray="3,3" />
+                      <line x1="20" y1="65" x2="480" y2="65" stroke="var(--border-color)" stroke-dasharray="3,3" />
+                      <line x1="20" y1="100" x2="480" y2="100" stroke="var(--border-color)" stroke-dasharray="3,3" />
+                      <line x1="20" y1="135" x2="480" y2="135" stroke="var(--border-color)" stroke-dasharray="3,3" />
+                      <line x1="20" y1="170" x2="480" y2="170" stroke="var(--border-color)" stroke-dasharray="3,3" />
+                      
+                      <!-- Area shading definitions -->
+                      <defs>
+                        <linearGradient id="sharpInflowGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="var(--color-success)" stop-opacity="0.08"/>
+                          <stop offset="100%" stop-color="var(--color-success)" stop-opacity="0.0"/>
+                        </linearGradient>
+                        <linearGradient id="sharpOutflowGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stop-color="var(--color-primary)" stop-opacity="0.06"/>
+                          <stop offset="100%" stop-color="var(--color-primary)" stop-opacity="0.0"/>
+                        </linearGradient>
+                      </defs>
+
+                      <!-- Shade under graphs (aligning to Y=170 axis baseline) -->
+                      <path d="M 20,120 L 110,100 L 200,90 L 290,70 L 380,60 L 470,30 L 470,170 L 20,170 Z" fill="url(#sharpInflowGrad)" />
+                      <path d="M 20,140 L 110,135 L 200,130 L 290,145 L 380,150 L 470,160 L 470,170 L 20,170 Z" fill="url(#sharpOutflowGrad)" />
+
+                      <!-- Graph Paths (Sharp transitions, thin premium stroke: 2px) -->
+                      <!-- Inflow (Green) -->
+                      <path d="M 20,120 L 110,100 L 200,90 L 290,70 L 380,60 L 470,30" stroke="var(--color-success)" stroke-width="2.5" stroke-linecap="square" fill="none" />
+                      <!-- Outflow (Indigo) -->
+                      <path d="M 20,140 L 110,135 L 200,130 L 290,145 L 380,150 L 470,160" stroke="var(--color-primary)" stroke-width="2.5" stroke-linecap="square" fill="none" />
+
+                      <!-- Tiny precise markers (r=3, hover point triggers) -->
+                      <!-- Feb -->
+                      <circle cx="20" cy="120" r="3" fill="var(--color-success)" class="chart-point-marker" />
+                      <circle cx="20" cy="140" r="3" fill="var(--color-primary)" class="chart-point-marker" />
+                      
+                      <!-- Mar -->
+                      <circle cx="110" cy="100" r="3" fill="var(--color-success)" class="chart-point-marker" />
+                      <circle cx="110" cy="135" r="3" fill="var(--color-primary)" class="chart-point-marker" />
+
+                      <!-- Apr -->
+                      <circle cx="200" cy="90" r="3" fill="var(--color-success)" class="chart-point-marker" />
+                      <circle cx="200" cy="130" r="3" fill="var(--color-primary)" class="chart-point-marker" />
+
+                      <!-- May -->
+                      <circle cx="290" cy="70" r="3" fill="var(--color-success)" class="chart-point-marker" />
+                      <circle cx="290" cy="145" r="3" fill="var(--color-primary)" class="chart-point-marker" />
+
+                      <!-- Jun -->
+                      <circle cx="380" cy="60" r="3" fill="var(--color-success)" class="chart-point-marker" />
+                      <circle cx="380" cy="150" r="3" fill="var(--color-primary)" class="chart-point-marker" />
+
+                      <!-- Jul -->
+                      <circle cx="470" cy="30" r="3" fill="var(--color-success)" class="chart-point-marker" />
+                      <circle cx="470" cy="160" r="3" fill="var(--color-primary)" class="chart-point-marker" />
+
+                      <!-- Invisible interactive hover hot-spots for tooltips -->
+                      <circle cx="20" cy="130" r="25" fill="transparent" class="chart-point-trigger" data-idx="0" />
+                      <circle cx="110" cy="118" r="25" fill="transparent" class="chart-point-trigger" data-idx="1" />
+                      <circle cx="200" cy="110" r="25" fill="transparent" class="chart-point-trigger" data-idx="2" />
+                      <circle cx="290" cy="108" r="25" fill="transparent" class="chart-point-trigger" data-idx="3" />
+                      <circle cx="380" cy="105" r="25" fill="transparent" class="chart-point-trigger" data-idx="4" />
+                      <circle cx="470" cy="95" r="25" fill="transparent" class="chart-point-trigger" data-idx="5" />
+                    </svg>
+
+                    <!-- Floating glassmorphic tooltip -->
+                    <div id="chartTooltip" class="chart-tooltip-box"></div>
+                  </div>
+
+                  <!-- Bottom Axis (smaller typography, spacing) -->
+                  <div class="d-flex justify-between" style="font-size: 10px; color: var(--text-muted); padding: 0.5rem 1.25rem 0 1.25rem; border-top: 1px solid var(--border-color);">
+                    <span>Feb</span>
+                    <span>Mar</span>
+                    <span>Apr</span>
+                    <span>May</span>
+                    <span>Jun</span>
+                    <span>Jul (Forecast)</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Secondary Content Area -->
         <div class="grid-12">
           
-          <!-- Recent Transactions (List Panel) -->
+          <!-- Recent Transactions Container -->
           <div class="col-12 col-lg-8">
-            <div class="card-glass" style="height: 100%;">
-              <div class="d-flex justify-between align-center" style="margin-bottom: 1.5rem;">
-                <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0;">Recent Transactions Ledger</h4>
-                <button class="btn btn-secondary btn-sm">View All Ledger</button>
+            <div class="card-glass" style="height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                <div class="d-flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+                  <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0;">Recent Transactions Ledger</h4>
+                  <span class="badge badge-success" style="font-size: 10px;">Safe Storage</span>
+                </div>
+
+                <!-- Target transaction container populated dynamically by JS -->
+                <div id="transactionsContainer" style="display: flex; flex-direction: column;">
+                  <!-- Loading placeholders or logs go here -->
+                </div>
               </div>
 
-              <!-- Transactions list mock -->
-              <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <!-- Item 1 -->
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-success-light); color: var(--color-success); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                      <i data-lucide="trending-up" style="width: 18px; height: 18px;"></i>
-                    </div>
-                    <div>
-                      <div style="font-size: var(--fs-sm); font-weight: 700;">Regular Salary Credited</div>
-                      <div style="font-size: 10px; color: var(--text-muted);">June 28, 2026 • Cash Inflow</div>
-                    </div>
-                  </div>
-                  <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-success);">+₹85,000.00</div>
-                </div>
-
-                <!-- Item 2 -->
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-danger-light); color: var(--color-danger); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                      <i data-lucide="shopping-bag" style="width: 18px; height: 18px;"></i>
-                    </div>
-                    <div>
-                      <div style="font-size: var(--fs-sm); font-weight: 700;">Whole Foods Outflow</div>
-                      <div style="font-size: 10px; color: var(--text-muted);">June 27, 2026 • Grocery Outflow</div>
-                    </div>
-                  </div>
-                  <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-danger);">-₹4,520.00</div>
-                </div>
-
-                <!-- Item 3 -->
-                <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
-                  <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background-color: var(--color-primary-light); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                      <i data-lucide="cpu" style="width: 18px; height: 18px;"></i>
-                    </div>
-                    <div>
-                      <div style="font-size: var(--fs-sm); font-weight: 700;">AWS Cloud Hosting Invoice</div>
-                      <div style="font-size: 10px; color: var(--text-muted);">June 26, 2026 • Server Bills</div>
-                    </div>
-                  </div>
-                  <div style="font-family: var(--font-display); font-weight: 700; color: var(--color-danger);">-₹1,850.00</div>
-                </div>
+              <div style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1.5rem; text-align: center;">
+                <button class="btn btn-secondary btn-sm" style="width: 100%;">View Full Transaction Ledger</button>
               </div>
             </div>
           </div>
 
           <!-- Quick Actions & Budgets -->
           <div class="col-12 col-lg-4">
-            <div class="card-glass d-flex flex-column justify-between" style="height: 100%;">
+            <div class="card-glass d-flex flex-column justify-between" style="height: 100%; gap: 2rem;">
               <div>
                 <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 1.5rem;">Ledger Actions</h4>
                 
-                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
-                  <button class="btn btn-primary" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                  <button class="btn btn-primary" id="openAddTxModalBtn" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
                     <i data-lucide="plus-circle" style="width: 18px; height: 18px;"></i> Add Transaction Log
                   </button>
-                  <button class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;">
-                    <i data-lucide="download" style="width: 18px; height: 18px;"></i> Download Statement Sheet
+                  <button class="btn btn-secondary" style="justify-content: flex-start; text-align: left; padding: 0.75rem 1rem;" onclick="window.print()">
+                    <i data-lucide="download" style="width: 18px; height: 18px;"></i> Export Ledger Sheet
                   </button>
                 </div>
               </div>
 
-              <!-- Savings Progress Mock indicator -->
+              <!-- Savings Progress indicator -->
               <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
                 <div class="d-flex justify-between align-center" style="font-size: var(--fs-sm); font-weight: 600; margin-bottom: 0.5rem;">
                   <span>Savings Goal: Laptop</span>
-                  <span class="text-gradient">84% Complete</span>
+                  <span class="text-gradient" id="savingsGoalPct">84% Complete</span>
                 </div>
                 <div style="height: 8px; background-color: var(--bg-secondary); border-radius: var(--radius-full); overflow: hidden;">
-                  <div style="width: 84%; height: 100%; background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end)); border-radius: var(--radius-full); box-shadow: var(--shadow-glow);"></div>
+                  <div id="savingsGoalProgress" style="width: 84%; height: 100%; background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end)); border-radius: var(--radius-full); box-shadow: var(--shadow-glow); transition: width 0.4s ease;"></div>
                 </div>
               </div>
             </div>
@@ -337,6 +549,84 @@
 
     </main>
 
+  </div>
+
+  <!-- ==========================================
+       ADD TRANSACTION MODAL (PHASE 2)
+       ========================================== -->
+  <div class="modal-backdrop" id="transactionModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalTitle">Log Transaction Entry</h4>
+        <button class="toast-close" id="closeModalBtn" aria-label="Close modal"><i data-lucide="x"></i></button>
+      </div>
+      <form id="addTransactionForm">
+        <div class="modal-body" style="padding: 0 0.25rem;">
+          
+          <!-- Title input -->
+          <div class="form-group">
+            <label class="form-label" for="txTitle">Transaction Title</label>
+            <div class="form-control-wrapper">
+              <i data-lucide="edit-3"></i>
+              <input type="text" id="txTitle" class="form-control has-icon" placeholder="e.g. Whole Foods Outflow" required>
+            </div>
+          </div>
+
+          <div class="grid-12">
+            <!-- Amount -->
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="txAmount">Amount (INR)</label>
+              <div class="form-control-wrapper">
+                <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
+                <input type="number" id="txAmount" class="form-control has-icon" placeholder="500.00" step="0.01" min="0.01" required>
+              </div>
+            </div>
+            <!-- Log Type -->
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="txType">Log Type</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="layers"></i>
+                <select id="txType" class="form-control has-icon" required style="cursor: pointer;">
+                  <option value="expense">Expense (Outflow)</option>
+                  <option value="income">Income (Inflow)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-12">
+            <!-- Category -->
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="txCategory">Category</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="tag"></i>
+                <select id="txCategory" class="form-control has-icon" required style="cursor: pointer;">
+                  <option value="food">Food & Groceries</option>
+                  <option value="bills">Server & Utility Bills</option>
+                  <option value="salary">Salary Inflow</option>
+                  <option value="entertainment">Entertainment</option>
+                  <option value="travel">Travel & Transport</option>
+                  <option value="others">Other Categories</option>
+                </select>
+              </div>
+            </div>
+            <!-- Date -->
+            <div class="col-12 col-md-6 form-group">
+              <label class="form-label" for="txDate">Transaction Date</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="calendar"></i>
+                <input type="date" id="txDate" class="form-control has-icon" style="cursor: pointer;">
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Entry <i data-lucide="check"></i></button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Entry Script -->

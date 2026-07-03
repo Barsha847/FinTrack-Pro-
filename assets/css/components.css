@@ -558,3 +558,235 @@
   justify-content: flex-end;
   gap: 1rem;
 }
+
+/* ==========================================
+   LOADING SKELETONS (PHASE 2)
+   ========================================== */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite linear;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  border-color: transparent !important;
+}
+
+[data-theme="dark"] .skeleton {
+  background: linear-gradient(90deg, rgba(24, 24, 27, 0.4) 25%, rgba(255, 255, 255, 0.05) 50%, rgba(24, 24, 27, 0.4) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text {
+  height: 12px;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.skeleton-title {
+  height: 18px;
+  margin-bottom: 12px;
+  width: 60%;
+}
+
+.skeleton-value {
+  height: 28px;
+  margin-bottom: 8px;
+  width: 45%;
+}
+
+.skeleton-avatar {
+  border-radius: var(--radius-full);
+  width: 40px;
+  height: 40px;
+}
+
+.skeleton-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+}
+
+/* ==========================================
+   EMPTY STATES (PHASE 2)
+   ========================================== */
+.empty-state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1.5rem;
+  width: 100%;
+}
+
+.empty-state-svg {
+  width: 140px;
+  height: 140px;
+  margin-bottom: 1.5rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-md);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.empty-state-desc {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Premium Select Arrow Customization */
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.2em;
+  padding-right: 2.5rem;
+}
+
+/* ==========================================
+   CASH FLOW ANALYTICS OVERHAUL (PHASE 2)
+   ========================================== */
+.cashflow-analytics-card {
+  position: relative;
+}
+
+.cashflow-analytics-left {
+  border-right: 1px solid var(--border-color);
+  padding-right: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .cashflow-analytics-left {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.cashflow-kpi-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.cashflow-kpi-value {
+  font-family: var(--font-display);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.cashflow-insight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.cashflow-insight-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--fs-xs);
+}
+
+.cashflow-insight-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.cashflow-insight-value {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+/* Custom Chart Tooltip styling */
+.chart-tooltip-box {
+  background: var(--bg-card);
+  backdrop-filter: var(--bg-glass-blur);
+  -webkit-backdrop-filter: var(--bg-glass-blur);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  padding: 0.75rem 1rem;
+  font-size: 11px;
+  pointer-events: none;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: scale(0.95);
+  z-index: var(--z-modal);
+  width: 180px;
+}
+
+.chart-tooltip-box.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.chart-tooltip-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: var(--fs-xs);
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25rem;
+}
+
+.chart-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+.chart-tooltip-row:last-child {
+  margin-bottom: 0;
+  margin-top: 0.35rem;
+  padding-top: 0.25rem;
+  border-top: 1px dashed var(--border-color);
+}
+
+.chart-tooltip-label {
+  color: var(--text-secondary);
+}
+
+.chart-tooltip-val {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Hover points triggers overlay */
+.chart-point-trigger {
+  cursor: pointer;
+  transition: r var(--motion-hover), stroke-width var(--motion-hover);
+}
+
+.chart-point-trigger:hover {
+  r: 7 !important;
+  stroke-width: 3px !important;
+}
+
+
