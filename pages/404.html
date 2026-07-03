@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — FinTrack Pro</title>
+  <meta name="description" content="The requested page could not be located.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: var(--bg-primary);">
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <div class="card-glass reveal" style="max-width: 460px; width: 90%; padding: 2.5rem; text-align: center;">
+    <!-- Large vector warning illustration -->
+    <div class="flex-center" style="margin-bottom: 1.5rem;">
+      <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-alert-octagon">
+        <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+
+    <h1 style="font-family: var(--font-display); font-weight: 800; font-size: 2.5rem; margin-bottom: 0.5rem;" class="text-gradient">404 Error</h1>
+    <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">Destination Not Located</h4>
+    <p style="font-size: var(--fs-xs); color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.5;">
+      The URL structure you entered was either renamed, removed, or typed incorrectly. Use developer keyboard sequences to redirect back.
+    </p>
+
+    <div class="d-flex flex-column gap-2">
+      <a href="dashboard.html" class="btn btn-primary" style="justify-content: center;">
+        Go to Dashboard <i data-lucide="arrow-right"></i>
+      </a>
+      <a href="../index.html" class="btn btn-secondary" style="justify-content: center;">
+        Landing Home
+      </a>
+    </div>
+  </div>
+
+  <!-- Entry Script to clear preloader -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>

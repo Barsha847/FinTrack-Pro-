@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internal Error — FinTrack Pro</title>
+  <meta name="description" content="An internal validation error occurred.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/dark-theme.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/grid.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background-color: var(--bg-primary);">
+
+  <!-- PRELOADER -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-spinner"></div>
+    <div class="preloader-logo">FinTrack <span class="text-gradient">Pro</span></div>
+  </div>
+
+  <div class="card-glass reveal" style="max-width: 460px; width: 90%; padding: 2.5rem; text-align: center;">
+    <div class="flex-center" style="margin-bottom: 1.5rem;">
+      <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather feather-activity">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+      </svg>
+    </div>
+
+    <h1 style="font-family: var(--font-display); font-weight: 800; font-size: 2.5rem; margin-bottom: 0.5rem;" class="text-gradient">500 Error</h1>
+    <h4 style="font-family: var(--font-display); font-weight: 700; margin-bottom: 1rem; color: var(--text-primary);">Internal Validation Halt</h4>
+    <p style="font-size: var(--fs-xs); color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.5;">
+      Our databases encountered an unexpected query execution exception. Our engineers are tracking and tracing this event dump.
+    </p>
+
+    <div class="d-flex flex-column gap-2">
+      <button onclick="window.location.reload();" class="btn btn-primary" style="justify-content: center;">
+        Reload Session <i data-lucide="refresh-cw"></i>
+      </button>
+      <a href="dashboard.html" class="btn btn-secondary" style="justify-content: center;">
+        Go to Dashboard
+      </a>
+    </div>
+  </div>
+
+  <!-- Entry Script to clear preloader -->
+  <script type="module" src="../assets/js/app.js"></script>
+</body>
+</html>

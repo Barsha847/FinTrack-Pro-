@@ -22,6 +22,8 @@ import { initNotificationsPage } from './notifications.js';
 import { initCalendarPage } from './calendar.js';
 import { initProfilePage } from './profile.js';
 import { initSettingsPage } from './settings.js';
+import { initCommandPalette } from './palette.js';
+import { initPolish } from './polish.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize all subsystems
@@ -50,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initCalendarPage();
   initProfilePage();
   initSettingsPage();
+
+  // Interface Polish (Phase 5)
+  initCommandPalette();
+  initPolish();
 
   // Initialize Navbar Mobile Drawer (landing index.html page specific)
   initMobileNavbar();
