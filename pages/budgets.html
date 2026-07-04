@@ -158,7 +158,7 @@
             </div>
             <div class="dropdown-menu" id="profileDropdown" style="width: 200px;">
               <div class="profile-menu-links">
-                <a href="#profile" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
+                <a href="profile.html" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
                 <a href="login.html" class="profile-menu-link logout"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out</a>
               </div>
             </div>
@@ -289,6 +289,7 @@
                 <option value="others">Other Categories</option>
               </select>
             </div>
+            <div class="error-message"></div>
           </div>
           <div class="form-group">
             <label class="form-label" for="budgetLimit">Limit Amount (INR)</label>
@@ -296,6 +297,7 @@
               <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
               <input type="number" id="budgetLimit" class="form-control has-icon" placeholder="10000.00" step="0.01" min="0.01" required>
             </div>
+            <div class="error-message"></div>
           </div>
         </div>
         <div class="modal-footer">

@@ -3,6 +3,7 @@
  */
 
 import { showToast } from './utils.js';
+import { validateFormInputs } from './validation.js';
 
 export function initNavigation() {
   // Define auth flows and their redirect destinations
@@ -26,8 +27,27 @@ export function initNavigation() {
       const customValid = form.dataset.valid === 'true'; // Set by validation.js
       
       if (isFormValid && customValid) {
+        // Collect form data if signing up or logging in to sync header profile
+        if (flow.formId === 'signupForm') {
+          const nameVal = document.getElementById('signupName')?.value.trim();
+          const emailVal = document.getElementById('signupEmail')?.value.trim();
+          if (nameVal) localStorage.setItem('fintrack_user_name', nameVal);
+          if (emailVal) localStorage.setItem('fintrack_user_email', emailVal);
+        } else if (flow.formId === 'loginForm') {
+          const emailVal = document.getElementById('loginEmail')?.value.trim();
+          if (emailVal) {
+            localStorage.setItem('fintrack_user_email', emailVal);
+            const currentName = localStorage.getItem('fintrack_user_name');
+            if (!currentName) {
+              const defaultName = emailVal.split('@')[0].split(/[._+-]+/)[0];
+              const capitalizedName = defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
+              localStorage.setItem('fintrack_user_name', capitalizedName);
+            }
+          }
+        }
         handleMockSubmission(form, flow.redirectUrl, flow.successMsg, flow.title);
       } else {
+        validateFormInputs(form);
         showToast('Please resolve all validation errors before proceeding.', 'danger', 'Form Invalid');
       }
     });

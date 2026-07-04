@@ -162,7 +162,7 @@
             </div>
             <div class="dropdown-menu" id="profileDropdown" style="width: 200px;">
               <div class="profile-menu-links">
-                <a href="#profile" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
+                <a href="profile.html" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
                 <a href="login.html" class="profile-menu-link logout"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out</a>
               </div>
             </div>
@@ -295,6 +295,7 @@
               <i data-lucide="edit-3"></i>
               <input type="text" id="txTitle" class="form-control has-icon" placeholder="e.g. Freelancing Work" required>
             </div>
+            <div class="error-message"></div>
           </div>
           <div class="grid-12">
             <div class="col-12 col-md-6 form-group">
@@ -303,6 +304,7 @@
                 <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
                 <input type="number" id="txAmount" class="form-control has-icon" placeholder="15000.00" step="0.01" min="0.01" required>
               </div>
+              <div class="error-message"></div>
             </div>
             <div class="col-12 col-md-6 form-group">
               <label class="form-label" for="txCategory">Category</label>
@@ -313,6 +315,7 @@
                   <option value="others">Other Streams</option>
                 </select>
               </div>
+              <div class="error-message"></div>
             </div>
           </div>
           <div class="form-group">
@@ -321,6 +324,7 @@
               <i data-lucide="calendar"></i>
               <input type="date" id="txDate" class="form-control has-icon" required>
             </div>
+            <div class="error-message"></div>
           </div>
         </div>
         <div class="modal-footer">

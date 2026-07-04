@@ -37,7 +37,7 @@ const DEFAULT_NOTIFICATIONS = [
 ];
 
 export function initDashboard() {
-  const isDashboardPage = document.querySelector('.dashboard-layout');
+  const isDashboardPage = document.querySelector('.dashboard-page-layout');
   if (!isDashboardPage) return;
 
   console.warn("Initializing FinTrack Pro Dashboard (Phase 2)...");
@@ -387,10 +387,7 @@ function setupAddTransactionModal() {
   
   if (!modal || !openBtn) return;
 
-  let lastActiveElement;
-
   const openModal = () => {
-    lastActiveElement = document.activeElement;
     modal.classList.add('show');
     
     // Set initial focus
@@ -398,47 +395,13 @@ function setupAddTransactionModal() {
     if (firstInput) {
       setTimeout(() => firstInput.focus(), 100);
     }
-    
-    document.addEventListener('keydown', trapFocus);
-    console.warn("Add Transaction modal opened. Focus trapped.");
+    console.warn("Add Transaction modal opened.");
   };
 
   const closeModal = () => {
     modal.classList.remove('show');
-    document.removeEventListener('keydown', trapFocus);
-    if (lastActiveElement) {
-      lastActiveElement.focus();
-    }
     form.reset();
     console.warn("Add Transaction modal closed.");
-  };
-
-  // Keyboard accessibility: trap focus inside modal
-  const trapFocus = (e) => {
-    if (e.key === 'Escape') {
-      closeModal();
-      return;
-    }
-
-    if (e.key === 'Tab') {
-      const focusableSelectors = 'input, select, textarea, button, [tabindex="0"]';
-      const focusables = modal.querySelectorAll(focusableSelectors);
-      
-      const firstFocusable = focusables[0];
-      const lastFocusable = focusables[focusables.length - 1];
-
-      if (e.shiftKey) { // Back tab
-        if (document.activeElement === firstFocusable) {
-          lastFocusable.focus();
-          e.preventDefault();
-        }
-      } else { // Normal tab
-        if (document.activeElement === lastFocusable) {
-          firstFocusable.focus();
-          e.preventDefault();
-        }
-      }
-    }
   };
 
   // Open listeners
@@ -447,13 +410,6 @@ function setupAddTransactionModal() {
   // Close listeners
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
-  
-  // Close when clicking overlay backdrop
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      closeModal();
-    }
-  });
 
   // Form Submit Action
   if (form) {

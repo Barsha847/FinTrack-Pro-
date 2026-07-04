@@ -329,3 +329,15 @@ function initOtpAdvancement() {
     }
   }
 }
+
+/**
+ * Programmatically triggers validations on all inputs within a form
+ * @param {HTMLFormElement} form 
+ */
+export function validateFormInputs(form) {
+  const inputs = form.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    validateInput(input, form);
+  });
+  checkFormValidity(form);
+}

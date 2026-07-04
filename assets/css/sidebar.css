@@ -62,9 +62,11 @@
   white-space: nowrap;
 }
 
-.sidebar-logo i {
+.sidebar-logo i, .sidebar-logo svg {
   color: var(--color-primary);
   font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
   flex-shrink: 0;
 }
 
@@ -125,8 +127,10 @@
   cursor: pointer;
 }
 
-.sidebar-menu-item i {
+.sidebar-menu-item i, .sidebar-menu-item svg {
   font-size: 1.2rem;
+  width: 1.2rem;
+  height: 1.2rem;
   flex-shrink: 0;
   transition: transform var(--motion-hover);
 }
@@ -143,7 +147,7 @@
   color: var(--text-primary);
 }
 
-.sidebar-menu-item:hover i {
+.sidebar-menu-item:hover i, .sidebar-menu-item:hover svg {
   transform: translateX(2px);
 }
 
@@ -228,7 +232,7 @@
 }
 
 /* Adjust toggle icon flip when collapsed */
-.sidebar.collapsed .sidebar-toggle-trigger i {
+.sidebar.collapsed .sidebar-toggle-trigger i, .sidebar.collapsed .sidebar-toggle-trigger svg {
   transform: rotate(180deg);
 }
 
@@ -250,7 +254,7 @@
   padding: 0.8rem 0;
 }
 
-.sidebar.collapsed .sidebar-menu-item:hover i {
+.sidebar.collapsed .sidebar-menu-item:hover i, .sidebar.collapsed .sidebar-menu-item:hover svg {
   transform: scale(1.1);
 }
 

@@ -42,9 +42,11 @@
   letter-spacing: -0.02em;
 }
 
-.navbar-brand i {
+.navbar-brand i, .navbar-brand svg {
   color: var(--color-primary);
   font-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 /* Nav Links Group */
@@ -119,8 +121,10 @@
   transform: translateY(-2px);
 }
 
-.theme-toggle-btn i {
+.theme-toggle-btn i, .theme-toggle-btn svg {
   font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
 }
 
 /* Sun/Moon Visibility */
@@ -272,18 +276,20 @@
   box-shadow: var(--shadow-glow);
 }
 
-.search-bar-container i {
+.search-bar-container i, .search-bar-container svg {
   position: absolute;
   left: 0.85rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
   font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
   pointer-events: none;
   transition: color var(--motion-hover);
 }
 
-.search-bar-input:focus + i {
+.search-bar-input:focus + i, .search-bar-input:focus + svg {
   color: var(--color-primary);
 }
 

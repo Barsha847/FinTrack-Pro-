@@ -6,14 +6,19 @@ export function initAnimations() {
   // 1. Handle Preloader Fadeout
   const preloader = document.getElementById('preloader');
   if (preloader) {
-    // Wait until entire page resources are loaded, then remove preloader
-    window.addEventListener('load', () => {
+    const dismissPreloader = () => {
       setTimeout(() => {
         preloader.classList.add('fade-out');
         // Fully remove from DOM after CSS transition finishes (400ms)
         setTimeout(() => preloader.remove(), 400);
       }, 500); // subtle delay for polished look
-    });
+    };
+
+    if (document.readyState === 'complete') {
+      dismissPreloader();
+    } else {
+      window.addEventListener('load', dismissPreloader);
+    }
   }
 
   // 2. Scroll Reveal Intersection Observer

@@ -129,3 +129,125 @@ export function formatCurrency(amount) {
     maximumFractionDigits: 2
   });
 }
+
+/**
+ * Calculates initials from user's full name
+ * @param {string} name 
+ */
+function getInitials(name) {
+  if (!name) return 'JD';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+/**
+ * Synchronizes user profile elements across the layout on page load
+ */
+export function syncUserProfile() {
+  const name = localStorage.getItem('fintrack_user_name') || 'John Doe';
+  const email = localStorage.getItem('fintrack_user_email') || 'john.doe@example.com';
+  const initials = getInitials(name);
+
+  // Sync sidebars
+  const sidebarNames = document.querySelectorAll('.sidebar-profile-name');
+  const sidebarEmails = document.querySelectorAll('.sidebar-profile-email');
+  sidebarNames.forEach(el => el.textContent = name);
+  sidebarEmails.forEach(el => el.textContent = email);
+
+  const sidebarAvatars = document.querySelectorAll('.sidebar-footer .avatar-initials');
+  sidebarAvatars.forEach(el => el.textContent = initials);
+
+  // Sync headers
+  const headerNameTrigger = document.querySelector('#profileTriggerBtn span');
+  if (headerNameTrigger) {
+    headerNameTrigger.textContent = name;
+  }
+
+  const dropdownName = document.querySelector('#profileDropdown .profile-menu-info > div:not(.avatar) > div:first-child');
+  const dropdownEmail = document.querySelector('#profileDropdown .profile-menu-info > div:not(.avatar) > div:nth-child(2)');
+  if (dropdownName) dropdownName.textContent = name;
+  if (dropdownEmail) dropdownEmail.textContent = email;
+
+  const headerAvatars = document.querySelectorAll('#profileTriggerBtn .avatar, #profileDropdown .avatar');
+  headerAvatars.forEach(el => {
+    el.textContent = initials;
+  });
+}
+
+/**
+ * Sets up global logout click handlers with confirmation prompts
+ */
+export function setupLogout() {
+  const logoutElements = document.querySelectorAll('.logout, #sidebarLogout, .sidebar-logout-btn');
+  logoutElements.forEach(el => {
+    // Clear old listeners if any by cloning, or just override
+    const newEl = el.cloneNode(true);
+    el.parentNode.replaceChild(newEl, el);
+
+    newEl.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (confirm("Are you sure you want to sign out from FinTrack Pro?")) {
+        showToast("Signing you out of the secure session...", "info", "Logout Redirect");
+        setTimeout(() => {
+          const inPagesFolder = window.location.pathname.includes('/pages/');
+          window.location.href = inPagesFolder ? 'login.html' : 'pages/login.html';
+        }, 1000);
+      }
+    });
+  });
+}
+
+/**
+ * Manages modal focus traps, Escape key closure, and backdrop clicks globally
+ */
+export function initGlobalModalManager() {
+  const focusableSelectors = 'input, select, textarea, button, [tabindex="0"]';
+  
+  const handleKeyDown = (e) => {
+    const openModal = document.querySelector('.modal-backdrop.show');
+    if (!openModal) return;
+
+    if (e.key === 'Escape') {
+      closeModal(openModal);
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      const focusables = Array.from(openModal.querySelectorAll(focusableSelectors))
+        .filter(el => el.tabIndex >= 0 && !el.disabled && el.offsetParent !== null);
+      
+      if (focusables.length === 0) return;
+
+      const firstFocusable = focusables[0];
+      const lastFocusable = focusables[focusables.length - 1];
+
+      if (e.shiftKey) { // Shift + Tab
+        if (document.activeElement === firstFocusable) {
+          lastFocusable.focus();
+          e.preventDefault();
+        }
+      } else { // Tab
+        if (document.activeElement === lastFocusable) {
+          firstFocusable.focus();
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
+  const closeModal = (modal) => {
+    modal.classList.remove('show');
+    const form = modal.querySelector('form');
+    if (form) form.reset();
+  };
+
+  document.addEventListener('keydown', handleKeyDown);
+
+  // Outside click close
+  document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-backdrop') && e.target.classList.contains('show')) {
+      closeModal(e.target);
+    }
+  });
+}

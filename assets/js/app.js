@@ -7,7 +7,7 @@ import { initSidebar } from './sidebar.js';
 import { initNavigation } from './navigation.js';
 import { initValidation } from './validation.js';
 import { initAnimations } from './animation.js';
-import { initRipples, initIcons } from './utils.js';
+import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast } from './utils.js';
 import { initDashboard } from './dashboard.js';
 import { initIncomePage } from './income.js';
 import { initExpensesPage } from './expenses.js';
@@ -34,6 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initAnimations();
   initRipples();
   initIcons();
+  
+  // Global QA & UX Systems
+  syncUserProfile();
+  setupLogout();
+  initGlobalModalManager();
+  initContactForm();
   
   // Dashboard & Finance Modules
   initDashboard();
@@ -93,5 +99,28 @@ function initMobileNavbar() {
   const drawerLinks = drawer.querySelectorAll('.nav-link');
   drawerLinks.forEach(link => {
     link.addEventListener('click', closeMenu);
+  });
+}
+
+function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    
+    const submitBtn = form.querySelector('[type="submit"]');
+    if (!submitBtn) return;
+
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Sending...';
+
+    setTimeout(() => {
+      showToast("Your support message has been sent successfully. We will reply shortly.", "success", "Message Sent");
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+      form.reset();
+    }, 1200);
   });
 }
