@@ -2,17 +2,17 @@
  * FinTrack Pro - Navigation and Submission Router Module
  */
 
-import { showToast } from './utils.js';
+import { showToast, getRoutePath } from './utils.js';
 import { validateFormInputs } from './validation.js';
 
 export function initNavigation() {
   // Define auth flows and their redirect destinations
   const authFlows = [
-    { formId: 'loginForm', redirectUrl: 'dashboard.html', successMsg: 'Welcome back! Logging you in...', title: 'Login Successful' },
-    { formId: 'signupForm', redirectUrl: 'login.html', successMsg: 'Account created! Redirecting to login...', title: 'Signup Successful' },
-    { formId: 'forgotForm', redirectUrl: 'otp.html', successMsg: 'OTP sent! Redirecting to verification page...', title: 'Email Verified' },
-    { formId: 'otpForm', redirectUrl: 'reset-password.html', successMsg: 'OTP verified! Redirecting to password reset...', title: 'Code Verified' },
-    { formId: 'resetForm', redirectUrl: 'login.html', successMsg: 'Password updated! Redirecting to login...', title: 'Password Reset Successful' }
+    { formId: 'loginForm', routeKey: 'dashboard', successMsg: 'Welcome back! Logging you in...', title: 'Login Successful' },
+    { formId: 'signupForm', routeKey: 'login', successMsg: 'Account created! Redirecting to login...', title: 'Signup Successful' },
+    { formId: 'forgotForm', routeKey: 'otp', successMsg: 'OTP sent! Redirecting to verification page...', title: 'Email Verified' },
+    { formId: 'otpForm', routeKey: 'resetPassword', successMsg: 'OTP verified! Redirecting to password reset...', title: 'Code Verified' },
+    { formId: 'resetForm', routeKey: 'login', successMsg: 'Password updated! Redirecting to login...', title: 'Password Reset Successful' }
   ];
 
   authFlows.forEach(flow => {
@@ -45,7 +45,7 @@ export function initNavigation() {
             }
           }
         }
-        handleMockSubmission(form, flow.redirectUrl, flow.successMsg, flow.title);
+        handleMockSubmission(form, getRoutePath(flow.routeKey), flow.successMsg, flow.title);
       } else {
         validateFormInputs(form);
         showToast('Please resolve all validation errors before proceeding.', 'danger', 'Form Invalid');

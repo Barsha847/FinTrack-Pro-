@@ -2,6 +2,41 @@
  * FinTrack Pro - Utility Functions & Component Helpers
  */
 
+export const ROUTES = {
+  landing: "index.html",
+  dashboard: "dashboard.html",
+  income: "income.html",
+  expenses: "expenses.html",
+  budgets: "budgets.html",
+  savings: "savings.html",
+  investments: "investments.html",
+  loans: "loans.html",
+  bills: "bills.html",
+  reports: "reports.html",
+  settings: "settings.html",
+  profile: "profile.html",
+  notifications: "notifications.html",
+  login: "login.html",
+  otp: "otp.html",
+  resetPassword: "reset-password.html"
+};
+
+/**
+ * Resolves correct relative path for a route depending on current directory
+ * @param {string} routeName
+ */
+export function getRoutePath(routeName) {
+  const inPagesFolder = window.location.pathname.includes('/pages/');
+  const filename = ROUTES[routeName];
+  if (!filename) return '#';
+  
+  if (routeName === 'landing') {
+    return inPagesFolder ? '../index.html' : 'index.html';
+  }
+  
+  return inPagesFolder ? filename : `pages/${filename}`;
+}
+
 /**
  * Dynamically displays a premium custom toast notification
  * @param {string} message Toast descriptive text
@@ -190,8 +225,7 @@ export function setupLogout() {
       if (confirm("Are you sure you want to sign out from FinTrack Pro?")) {
         showToast("Signing you out of the secure session...", "info", "Logout Redirect");
         setTimeout(() => {
-          const inPagesFolder = window.location.pathname.includes('/pages/');
-          window.location.href = inPagesFolder ? 'login.html' : 'pages/login.html';
+          window.location.href = getRoutePath('login');
         }, 1000);
       }
     });

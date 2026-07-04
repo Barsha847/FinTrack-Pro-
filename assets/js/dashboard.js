@@ -585,7 +585,8 @@ function setupChartTooltip() {
 
     trigger.addEventListener('mousemove', (e) => {
       const rect = e.currentTarget.getBoundingClientRect();
-      const parentRect = e.currentTarget.offsetParent.getBoundingClientRect();
+      const offsetParent = tooltip.offsetParent || e.currentTarget.closest('.card-glass') || document.body;
+      const parentRect = offsetParent.getBoundingClientRect();
       
       // Calculate top and left positions relative to parent container
       let top = rect.top - parentRect.top - tooltip.offsetHeight - 12;
