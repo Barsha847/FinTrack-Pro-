@@ -18,6 +18,7 @@ export const ROUTES = {
   notifications: "notifications.html",
   login: "login.html",
   otp: "otp.html",
+  verifyOtp: "verify-email.html",
   resetPassword: "reset-password.html"
 };
 
@@ -218,18 +219,69 @@ export function setupLogout() {
   logoutElements.forEach(el => {
     // Clear old listeners if any by cloning, or just override
     const newEl = el.cloneNode(true);
-    el.parentNode.replaceChild(newEl, el);
+    if (el.parentNode) {
+      el.parentNode.replaceChild(newEl, el);
+    }
 
-    newEl.addEventListener('click', (e) => {
+    newEl.addEventListener('click', async (e) => {
       e.preventDefault();
       if (confirm("Are you sure you want to sign out from FinTrack Pro?")) {
         showToast("Signing you out of the secure session...", "info", "Logout Redirect");
+        try {
+          await fetchApi('/api/auth/logout', { method: 'POST' });
+        } catch (err) {
+          console.error("Logout error:", err);
+        }
+        sessionStorage.clear();
+        localStorage.clear();
         setTimeout(() => {
           window.location.href = getRoutePath('login');
         }, 1000);
       }
     });
   });
+}
+
+/**
+ * Fetch wrapper that automatically injects CSRF tokens and handles 401 redirects
+ */
+export async function fetchApi(url, options = {}) {
+  options.headers = options.headers || {};
+  
+  if (!(options.body instanceof FormData) && !options.headers['Content-Type']) {
+    options.headers['Content-Type'] = 'application/json';
+  }
+
+  const method = (options.method || 'GET').toUpperCase();
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+    const token = sessionStorage.getItem('csrf_token');
+    if (token) {
+      options.headers['X-CSRF-TOKEN'] = token;
+    }
+  }
+
+  options.credentials = 'include';
+
+  // Support accessing backend from standard front-end Live Server port 5500
+  let targetUrl = url;
+  if (window.location.port !== '8000' && url.startsWith('/api/')) {
+    targetUrl = 'http://localhost:8000' + url;
+  }
+
+  try {
+    const response = await fetch(targetUrl, options);
+    
+    if (response.status === 401 && !url.includes('/api/auth/me') && !url.includes('/api/auth/login')) {
+      sessionStorage.clear();
+      window.location.href = getRoutePath('login');
+      return null;
+    }
+    
+    return response;
+  } catch (err) {
+    console.error("Fetch API failure:", err);
+    throw err;
+  }
 }
 
 /**

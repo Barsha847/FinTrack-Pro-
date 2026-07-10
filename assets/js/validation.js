@@ -1,10 +1,13 @@
 /**
- * FinTrack Pro - Validation Module (Forms, Password Strength, and OTP inputs)
+ * FinTrack Pro - Validation & Authentication Integration Module
  */
 
-import { showToast } from './utils.js';
+import { showToast, fetchApi, getRoutePath } from './utils.js';
 
 export function initValidation() {
+  // Page access check and dynamic email display
+  verifyPageAccess();
+
   const forms = document.querySelectorAll('form');
   forms.forEach(form => {
     // Initial validation state for custom check
@@ -58,8 +61,325 @@ export function initValidation() {
     checkFormValidity(form);
   });
 
+  // Attach submit listeners to forms
+  setupFormHandlers();
+
   // OTP inputs auto-advance logic
   initOtpAdvancement();
+}
+
+/**
+ * Verify page access permissions and fill email context fields
+ */
+function verifyPageAccess() {
+  const path = window.location.pathname;
+
+  if (path.includes('verify-email.html')) {
+    const email = sessionStorage.getItem('verify_email');
+    if (!email) {
+      window.location.href = getRoutePath('landing');
+      return;
+    }
+    const textEl = document.getElementById('verifyEmailText');
+    if (textEl) textEl.textContent = email;
+  }
+
+  if (path.includes('otp.html')) {
+    const email = sessionStorage.getItem('reset_email');
+    if (!email) {
+      window.location.href = getRoutePath('login');
+      return;
+    }
+    const textEl = document.getElementById('resetEmailText');
+    if (textEl) textEl.textContent = email;
+  }
+
+  if (path.includes('reset-password.html')) {
+    const email = sessionStorage.getItem('reset_email');
+    if (!email) {
+      window.location.href = getRoutePath('login');
+      return;
+    }
+  }
+}
+
+/**
+ * Sets up custom async form handlers connected to PHP backend endpoints
+ */
+function setupFormHandlers() {
+  // 1. Sign Up Form
+  const signupForm = document.getElementById('signupForm');
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      validateFormInputs(signupForm);
+      if (signupForm.dataset.valid !== 'true') {
+        showToast("Please fix the validation errors in the form.", "warning", "Validation Failure");
+        return;
+      }
+
+      const submitBtn = signupForm.querySelector('[type="submit"]');
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Sending Code... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
+
+      try {
+        const email = document.getElementById('signupEmail').value;
+        const response = await fetchApi('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({
+            name: document.getElementById('signupName').value,
+            username: document.getElementById('signupUsername').value,
+            email: email,
+            phone: document.getElementById('signupPhone').value,
+            password: document.getElementById('signupPassword').value,
+            confirm_password: document.getElementById('signupConfirmPassword').value
+          })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          sessionStorage.setItem('verify_email', email);
+          // Store OTP for display on verify page (dev/test mode)
+          if (result.data && result.data.otp) {
+            sessionStorage.setItem('dev_otp', result.data.otp);
+          }
+          showToast(result.message, 'success', 'Registration Pending');
+          setTimeout(() => {
+            window.location.href = getRoutePath('verifyOtp');
+          }, 1500);
+        } else {
+          showToast(result.errors ? result.errors.join('<br>') : 'Registration failed', 'danger', 'Registration Error');
+        }
+      } catch (err) {
+        showToast('Network connection failure. Please try again.', 'danger', 'Connection Error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+  }
+
+  // 2. Verify Email OTP Form
+  const verifyOtpForm = document.getElementById('verifyOtpForm');
+  if (verifyOtpForm) {
+    verifyOtpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('otpCode').value;
+      if (code.length !== 6) {
+        showToast("Please enter the complete 6-digit OTP code.", "warning", "Invalid Code");
+        return;
+      }
+
+      const submitBtn = verifyOtpForm.querySelector('[type="submit"]');
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Verifying... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
+
+      try {
+        const email = sessionStorage.getItem('verify_email');
+        const response = await fetchApi('/api/auth/verify-email', {
+          method: 'POST',
+          body: JSON.stringify({ email, otp: code })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          // Save session state to localStorage
+          localStorage.setItem('fintrack_user_name', result.data.full_name);
+          localStorage.setItem('fintrack_user_email', result.data.email);
+          localStorage.setItem('fintrack_currency', result.data.currency);
+          sessionStorage.setItem('csrf_token', result.data.csrf_token);
+          
+          sessionStorage.removeItem('verify_email');
+          sessionStorage.removeItem('dev_otp'); // Clean up dev OTP
+
+          showToast("Email verified successfully! Redirecting...", 'success', 'Verification Success');
+          setTimeout(() => {
+            window.location.href = getRoutePath('dashboard');
+          }, 1500);
+        } else {
+          showToast(result.errors ? result.errors.join('<br>') : 'Verification failed', 'danger', 'Verification Error');
+        }
+      } catch (err) {
+        showToast('Network connection failure.', 'danger', 'Connection Error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+  }
+
+  // 3. Login Form
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      validateFormInputs(loginForm);
+      if (loginForm.dataset.valid !== 'true') return;
+
+      const submitBtn = loginForm.querySelector('[type="submit"]');
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Logging in... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
+
+      try {
+        const response = await fetchApi('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPassword').value
+          })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          // Store user preferences
+          localStorage.setItem('fintrack_user_name', result.data.full_name);
+          localStorage.setItem('fintrack_user_email', result.data.email);
+          localStorage.setItem('fintrack_currency', result.data.currency);
+          sessionStorage.setItem('csrf_token', result.data.csrf_token);
+
+          showToast("Login successful. Welcome back!", 'success', 'Access Granted');
+          setTimeout(() => {
+            window.location.href = getRoutePath('dashboard');
+          }, 1000);
+        } else {
+          const errMessage = result.errors ? result.errors[0] : 'Invalid email or password.';
+          showToast(errMessage, 'danger', 'Authentication Failed');
+        }
+      } catch (err) {
+        showToast('Network connection failure.', 'danger', 'Connection Error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+  }
+
+  // 4. Forgot Password Recovery Form
+  const forgotForm = document.getElementById('forgotForm');
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      validateFormInputs(forgotForm);
+      if (forgotForm.dataset.valid !== 'true') return;
+
+      const submitBtn = forgotForm.querySelector('[type="submit"]');
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Sending... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
+
+      try {
+        const email = document.getElementById('forgotEmail').value;
+        const response = await fetchApi('/api/auth/forgot-password', {
+          method: 'POST',
+          body: JSON.stringify({ email })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          sessionStorage.setItem('reset_email', email);
+          showToast(result.message, 'success', 'Code Dispatched');
+          setTimeout(() => {
+            window.location.href = getRoutePath('otp');
+          }, 1500);
+        } else {
+          showToast(result.errors ? result.errors.join('<br>') : 'Failed to send reset code', 'danger', 'Error');
+        }
+      } catch (err) {
+        showToast('Network connection failure.', 'danger', 'Connection Error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+  }
+
+  // 5. Password Reset OTP Verification Form
+  const otpForm = document.getElementById('otpForm');
+  if (otpForm) {
+    otpForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const code = document.getElementById('otpCode').value;
+      if (code.length !== 6) {
+        showToast("Please enter the complete 6-digit OTP code.", "warning", "Invalid Code");
+        return;
+      }
+
+      const submitBtn = otpForm.querySelector('[type="submit"]');
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Verifying... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
+
+      try {
+        const email = sessionStorage.getItem('reset_email');
+        const response = await fetchApi('/api/auth/verify-reset-otp', {
+          method: 'POST',
+          body: JSON.stringify({ email, otp: code })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          showToast("OTP verified successfully. Please enter your new password.", 'success', 'OTP Confirmed');
+          setTimeout(() => {
+            window.location.href = getRoutePath('resetPassword');
+          }, 1500);
+        } else {
+          showToast(result.errors ? result.errors.join('<br>') : 'Verification failed', 'danger', 'Verification Error');
+        }
+      } catch (err) {
+        showToast('Network connection failure.', 'danger', 'Connection Error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+  }
+
+  // 6. Save Reset Password Form
+  const resetForm = document.getElementById('resetForm');
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      validateFormInputs(resetForm);
+      if (resetForm.dataset.valid !== 'true') {
+        showToast("Ensure both passwords match and strength requirements are met.", "warning", "Form Invalid");
+        return;
+      }
+
+      const submitBtn = resetForm.querySelector('[type="submit"]');
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Saving... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
+
+      try {
+        const email = sessionStorage.getItem('reset_email');
+        const password = document.getElementById('resetPassword').value;
+        const confirm_password = document.getElementById('resetConfirmPassword').value;
+        const response = await fetchApi('/api/auth/reset-password', {
+          method: 'POST',
+          body: JSON.stringify({ email, password, confirm_password })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.success) {
+          sessionStorage.removeItem('reset_email');
+          showToast("Password updated successfully. Please log in.", 'success', 'Password Reset');
+          setTimeout(() => {
+            window.location.href = getRoutePath('login');
+          }, 1500);
+        } else {
+          showToast(result.errors ? result.errors.join('<br>') : 'Reset password failed', 'danger', 'Error');
+        }
+      } catch (err) {
+        showToast('Network connection failure.', 'danger', 'Connection Error');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origHtml;
+      }
+    });
+  }
 }
 
 function validateInput(input, form) {
@@ -232,10 +552,10 @@ function initOtpAdvancement() {
   const timerEl = document.getElementById('otpTimer');
   const resendBtn = document.getElementById('otpResendBtn');
   let countdownInterval;
-  let timeRemaining = 120; // 2 minutes
+  let timeRemaining = 300; // 5 minutes
 
   function startTimer() {
-    timeRemaining = 120;
+    timeRemaining = 300;
     if (resendBtn) {
       resendBtn.classList.remove('active');
       resendBtn.disabled = true;
@@ -272,19 +592,52 @@ function initOtpAdvancement() {
 
   // Reset/Resend Event Handler
   if (resendBtn) {
-    resendBtn.addEventListener('click', () => {
-      showToast('A new 6-digit verification code has been dispatched to your email address.', 'success', 'Code Dispatched');
+    resendBtn.addEventListener('click', async () => {
+      const isEmailVerification = window.location.pathname.includes('verify-email.html');
       
-      // Clear fields
-      otpInputs.forEach(input => input.value = '');
-      const hiddenOtpInput = document.getElementById('otpCode');
-      if (hiddenOtpInput) hiddenOtpInput.value = '';
-      
-      // Select first field
-      otpInputs[0].focus();
+      try {
+        if (isEmailVerification) {
+          const email = sessionStorage.getItem('verify_email');
+          const response = await fetchApi('/api/auth/resend-otp', {
+            method: 'POST',
+            body: JSON.stringify({ email })
+          });
+          const result = await response.json();
+          if (response.ok && result.success) {
+            showToast(result.message, 'success', 'Code Dispatched');
+          } else {
+            showToast(result.errors ? result.errors[0] : 'Failed to resend code', 'danger', 'Error');
+            return;
+          }
+        } else {
+          // Reset password flow
+          const email = sessionStorage.getItem('reset_email');
+          const response = await fetchApi('/api/auth/forgot-password', {
+            method: 'POST',
+            body: JSON.stringify({ email })
+          });
+          const result = await response.json();
+          if (response.ok && result.success) {
+            showToast('A new 6-digit recovery code has been sent to your email.', 'success', 'Code Dispatched');
+          } else {
+            showToast(result.errors ? result.errors[0] : 'Failed to resend code', 'danger', 'Error');
+            return;
+          }
+        }
 
-      // Restart timer
-      startTimer();
+        // Clear fields
+        otpInputs.forEach(input => input.value = '');
+        const hiddenOtpInput = document.getElementById('otpCode');
+        if (hiddenOtpInput) hiddenOtpInput.value = '';
+        
+        // Select first field
+        otpInputs[0].focus();
+
+        // Restart timer
+        startTimer();
+      } catch (err) {
+        showToast('Connection error during code resend.', 'danger', 'Connection Error');
+      }
     });
   }
 
