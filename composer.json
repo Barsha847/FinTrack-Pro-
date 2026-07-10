@@ -1,0 +1,20 @@
+{
+    "name": "barsha847/fintrack-pro",
+    "description": "Premium Personal Finance, Expense & Investment Management System Backend",
+    "type": "project",
+    "require": {
+        "php": ">=8.3",
+        "vlucas/phpdotenv": "^5.6",
+        "phpmailer/phpmailer": "^6.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Database\\": "database/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}
