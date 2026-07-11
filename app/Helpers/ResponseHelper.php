@@ -41,12 +41,12 @@ class ResponseHelper
     /**
      * Send a success response.
      * 
-     * @param mixed $data
      * @param string $message
+     * @param mixed $data
      * @param int $statusCode
      * @return void
      */
-    public static function success(mixed $data = null, string $message = 'Operation successful', int $statusCode = 200): void
+    public static function success(string $message = 'Operation successful', mixed $data = null, int $statusCode = 200): void
     {
         self::send(true, $message, $data, [], $statusCode);
     }

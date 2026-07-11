@@ -77,7 +77,17 @@ function verifyPageAccess() {
   if (path.includes('verify-email.html')) {
     const email = sessionStorage.getItem('verify_email');
     if (!email) {
-      window.location.href = getRoutePath('landing');
+      const container = document.querySelector('.card-glass');
+      if (container) {
+        container.innerHTML = `
+          <h3 style="font-weight: 700; text-align: center; margin-bottom: 1rem; color: var(--color-danger);">No Pending Verification</h3>
+          <p style="text-align: center; font-size: var(--fs-sm); margin-bottom: 2rem; color: var(--text-secondary);">No pending email verification was found. Please register a new account or log in if already verified.</p>
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+            <a href="signup.html" class="btn btn-primary" style="text-align: center;">Register Account</a>
+            <a href="login.html" class="btn btn-outline" style="text-align: center; border: 1px solid var(--border-color); padding: 0.85rem; border-radius: var(--radius-md); font-weight: 600; color: var(--text-primary); text-decoration: none;">Back to Log In</a>
+          </div>
+        `;
+      }
       return;
     }
     const textEl = document.getElementById('verifyEmailText');
@@ -87,7 +97,17 @@ function verifyPageAccess() {
   if (path.includes('otp.html')) {
     const email = sessionStorage.getItem('reset_email');
     if (!email) {
-      window.location.href = getRoutePath('login');
+      const container = document.querySelector('.card-glass');
+      if (container) {
+        container.innerHTML = `
+          <h3 style="font-weight: 700; text-align: center; margin-bottom: 1rem; color: var(--color-danger);">No Pending Reset</h3>
+          <p style="text-align: center; font-size: var(--fs-sm); margin-bottom: 2rem; color: var(--text-secondary);">No pending password reset request was found. Please initiate password recovery first.</p>
+          <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem;">
+            <a href="forgot-password.html" class="btn btn-primary" style="text-align: center;">Forgot Password</a>
+            <a href="login.html" class="btn btn-outline" style="text-align: center; border: 1px solid var(--border-color); padding: 0.85rem; border-radius: var(--radius-md); font-weight: 600; color: var(--text-primary); text-decoration: none;">Back to Log In</a>
+          </div>
+        `;
+      }
       return;
     }
     const textEl = document.getElementById('resetEmailText');
@@ -95,8 +115,9 @@ function verifyPageAccess() {
   }
 
   if (path.includes('reset-password.html')) {
-    const email = sessionStorage.getItem('reset_email');
-    if (!email) {
+    const email = sessionStorage.getItem('reset_email') || new URLSearchParams(window.location.search).get('email');
+    const token = sessionStorage.getItem('reset_token') || new URLSearchParams(window.location.search).get('token');
+    if (!email && !token) {
       window.location.href = getRoutePath('login');
       return;
     }
@@ -245,8 +266,18 @@ function setupFormHandlers() {
             window.location.href = getRoutePath('dashboard');
           }, 1000);
         } else {
-          const errMessage = result.errors ? result.errors[0] : 'Invalid email or password.';
-          showToast(errMessage, 'danger', 'Authentication Failed');
+          const isUnverified = result.errors && result.errors.includes('email_unverified');
+          if (isUnverified) {
+            const email = document.getElementById('loginEmail').value;
+            sessionStorage.setItem('verify_email', email);
+            showToast("Please verify your email address to continue.", 'warning', 'Email Verification Required');
+            setTimeout(() => {
+              window.location.href = getRoutePath('verifyOtp');
+            }, 1500);
+          } else {
+            const errMessage = result.errors ? result.errors[0] : 'Invalid email or password.';
+            showToast(errMessage, 'danger', 'Authentication Failed');
+          }
         }
       } catch (err) {
         showToast('Network connection failure.', 'danger', 'Connection Error');
@@ -279,13 +310,12 @@ function setupFormHandlers() {
 
         const result = await response.json();
         if (response.ok && result.success) {
-          sessionStorage.setItem('reset_email', email);
-          showToast(result.message, 'success', 'Code Dispatched');
+          showToast(result.message, 'success', 'Link Dispatched');
           setTimeout(() => {
-            window.location.href = getRoutePath('otp');
+            window.location.href = getRoutePath('login');
           }, 1500);
         } else {
-          showToast(result.errors ? result.errors.join('<br>') : 'Failed to send reset code', 'danger', 'Error');
+          showToast(result.errors ? result.errors.join('<br>') : 'Failed to send reset link', 'danger', 'Error');
         }
       } catch (err) {
         showToast('Network connection failure.', 'danger', 'Connection Error');
@@ -296,46 +326,7 @@ function setupFormHandlers() {
     });
   }
 
-  // 5. Password Reset OTP Verification Form
-  const otpForm = document.getElementById('otpForm');
-  if (otpForm) {
-    otpForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const code = document.getElementById('otpCode').value;
-      if (code.length !== 6) {
-        showToast("Please enter the complete 6-digit OTP code.", "warning", "Invalid Code");
-        return;
-      }
-
-      const submitBtn = otpForm.querySelector('[type="submit"]');
-      const origHtml = submitBtn.innerHTML;
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = 'Verifying... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
-
-      try {
-        const email = sessionStorage.getItem('reset_email');
-        const response = await fetchApi('/api/auth/verify-reset-otp', {
-          method: 'POST',
-          body: JSON.stringify({ email, otp: code })
-        });
-
-        const result = await response.json();
-        if (response.ok && result.success) {
-          showToast("OTP verified successfully. Please enter your new password.", 'success', 'OTP Confirmed');
-          setTimeout(() => {
-            window.location.href = getRoutePath('resetPassword');
-          }, 1500);
-        } else {
-          showToast(result.errors ? result.errors.join('<br>') : 'Verification failed', 'danger', 'Verification Error');
-        }
-      } catch (err) {
-        showToast('Network connection failure.', 'danger', 'Connection Error');
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = origHtml;
-      }
-    });
-  }
+  // Mock Reset OTP flow removed. Users click high-entropy reset links directly from emails.
 
   // 6. Save Reset Password Form
   const resetForm = document.getElementById('resetForm');
@@ -354,17 +345,19 @@ function setupFormHandlers() {
       submitBtn.innerHTML = 'Saving... <span style="display:inline-block; animation: spin 1s linear infinite; margin-left: 5px;">&#8635;</span>';
 
       try {
-        const email = sessionStorage.getItem('reset_email');
+        const email = sessionStorage.getItem('reset_email') || new URLSearchParams(window.location.search).get('email') || '';
+        const token = sessionStorage.getItem('reset_token') || new URLSearchParams(window.location.search).get('token') || '';
         const password = document.getElementById('resetPassword').value;
         const confirm_password = document.getElementById('resetConfirmPassword').value;
         const response = await fetchApi('/api/auth/reset-password', {
           method: 'POST',
-          body: JSON.stringify({ email, password, confirm_password })
+          body: JSON.stringify({ email, token, password, confirm_password })
         });
 
         const result = await response.json();
         if (response.ok && result.success) {
           sessionStorage.removeItem('reset_email');
+          sessionStorage.removeItem('reset_token');
           showToast("Password updated successfully. Please log in.", 'success', 'Password Reset');
           setTimeout(() => {
             window.location.href = getRoutePath('login');
@@ -598,7 +591,7 @@ function initOtpAdvancement() {
       try {
         if (isEmailVerification) {
           const email = sessionStorage.getItem('verify_email');
-          const response = await fetchApi('/api/auth/resend-otp', {
+          const response = await fetchApi('/api/auth/resend-verification', {
             method: 'POST',
             body: JSON.stringify({ email })
           });
@@ -656,6 +649,28 @@ function initOtpAdvancement() {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Backspace' && !input.value && index > 0) {
         otpInputs[index - 1].focus();
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        otpInputs[index - 1].focus();
+      } else if (e.key === 'ArrowRight' && index < otpInputs.length - 1) {
+        otpInputs[index + 1].focus();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+      const digits = pastedData.replace(/[^0-9]/g, '').substring(0, 6);
+      
+      for (let i = 0; i < digits.length; i++) {
+        if (otpInputs[i]) {
+          otpInputs[i].value = digits[i];
+        }
+      }
+      combineOtpValues();
+      
+      const focusIndex = Math.min(digits.length, otpInputs.length - 1);
+      if (otpInputs[focusIndex]) {
+        otpInputs[focusIndex].focus();
       }
     });
   });

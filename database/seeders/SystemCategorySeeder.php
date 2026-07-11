@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Database\Seeders;
+namespace Database\seeders;
 
 use App\Database\Database;
 use PDO;

@@ -8,7 +8,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../bootstrap.php';
 
 use App\Database\Database;
-use Database\Seeders\SystemCategorySeeder;
+use Database\seeders\SystemCategorySeeder;
 
 echo "===================================================\n";
 echo "FinTrack Pro - Database Seeding Utility\n";

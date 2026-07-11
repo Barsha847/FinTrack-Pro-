@@ -337,3 +337,62 @@ export function initGlobalModalManager() {
     }
   });
 }
+
+/**
+ * Validates active session status on protected pages and redirects on failure.
+ */
+export async function checkPageAuth() {
+  const path = window.location.pathname;
+  
+  const unprotectedKeywords = [
+    'login.html',
+    'signup.html',
+    'otp.html',
+    'verify-email.html',
+    'forgot-password.html',
+    'reset-password.html',
+    'maintenance.html',
+    '404.html',
+    '500.html'
+  ];
+  
+  const isLanding = !path.includes('/pages/') && (path.endsWith('/') || path.endsWith('index.html') || path.endsWith('FinTrack%20Pro/') || path.endsWith('FinTrack-Pro-/'));
+  const isUnprotected = isLanding || unprotectedKeywords.some(keyword => path.includes(keyword));
+  
+  if (isUnprotected) {
+    return;
+  }
+  
+  try {
+    const response = await fetchApi('/api/auth/session');
+    if (!response) return; // fetchApi redirects to login on 401
+    
+    const result = await response.json();
+    if (!result || !result.success || !result.data || !result.data.authenticated) {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = getRoutePath('login');
+      return;
+    }
+    
+    // Session is valid. If user profile is not in localStorage, fetch from /api/auth/me to sync
+    if (!localStorage.getItem('fintrack_user_name')) {
+      const meResponse = await fetchApi('/api/auth/me');
+      if (meResponse && meResponse.ok) {
+        const meResult = await meResponse.json();
+        if (meResult && meResult.success && meResult.data && meResult.data.user) {
+          const user = meResult.data.user;
+          localStorage.setItem('fintrack_user_name', user.full_name);
+          localStorage.setItem('fintrack_user_email', user.email);
+          syncUserProfile();
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Auth check failure:", err);
+    sessionStorage.clear();
+    localStorage.clear();
+    window.location.href = getRoutePath('login');
+  }
+}
+

@@ -7,7 +7,7 @@ import { initSidebar } from './sidebar.js';
 import { initNavigation } from './navigation.js';
 import { initValidation } from './validation.js';
 import { initAnimations } from './animation.js';
-import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast } from './utils.js';
+import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast, checkPageAuth } from './utils.js';
 import { initDashboard } from './dashboard.js';
 import { initIncomePage } from './income.js';
 import { initExpensesPage } from './expenses.js';
@@ -25,46 +25,101 @@ import { initSettingsPage } from './settings.js';
 import { initCommandPalette } from './palette.js';
 import { initPolish } from './polish.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize all subsystems
-  initTheme();
-  initSidebar();
-  initNavigation();
-  initValidation();
-  initAnimations();
-  initRipples();
-  initIcons();
-  
-  // Global QA & UX Systems
-  syncUserProfile();
-  setupLogout();
-  initGlobalModalManager();
-  initContactForm();
-  
-  // Dashboard & Finance Modules
-  initDashboard();
-  initIncomePage();
-  initExpensesPage();
-  initBudgetsPage();
-  initSavingsPage();
-  initInvestmentsPage();
-  initLoansPage();
-  initBillsPage();
+/**
+ * Centralized page authentication policy.
+ * Only pages listed here will execute the authentication guard (checkPageAuth).
+ * All other pages (including landing, login, signup, etc.) render freely.
+ */
+const PROTECTED_PAGES = new Set([
+  'dashboard.html',
+  'income.html',
+  'expenses.html',
+  'budgets.html',
+  'savings.html',
+  'investments.html',
+  'loans.html',
+  'bills.html',
+  'reports.html',
+  'analytics.html',
+  'notifications.html',
+  'calendar.html',
+  'profile.html',
+  'settings.html'
+]);
 
-  // Final Modules (Phase 4)
-  initAnalyticsPage();
-  initReportsPage();
-  initNotificationsPage();
-  initCalendarPage();
-  initProfilePage();
-  initSettingsPage();
+/**
+ * Safely dismiss the preloader. Called in finally blocks and as a fallback timeout.
+ */
+function dismissPreloaderSafely() {
+  const preloader = document.getElementById('preloader');
+  if (preloader && !preloader.classList.contains('fade-out')) {
+    preloader.classList.add('fade-out');
+    setTimeout(() => preloader.remove(), 400);
+  }
+}
 
-  // Interface Polish (Phase 5)
-  initCommandPalette();
-  initPolish();
+// Maximum 5-second safety net: preloader is ALWAYS removed even if initialization completely fails.
+const preloaderSafetyTimeout = setTimeout(() => {
+  dismissPreloaderSafely();
+}, 5000);
 
-  // Initialize Navbar Mobile Drawer (landing index.html page specific)
-  initMobileNavbar();
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    // Determine if the current page requires authentication
+    const currentFile = window.location.pathname.split('/').pop() || '';
+    const isProtectedPage = PROTECTED_PAGES.has(currentFile);
+
+    // Only run authentication guard on protected application pages
+    if (isProtectedPage) {
+      await checkPageAuth();
+    }
+
+    // Initialize all subsystems
+    initTheme();
+    initSidebar();
+    initNavigation();
+    initValidation();
+    initAnimations();
+    initRipples();
+    initIcons();
+    
+    // Global QA & UX Systems
+    syncUserProfile();
+    setupLogout();
+    initGlobalModalManager();
+    initContactForm();
+    
+    // Dashboard & Finance Modules
+    initDashboard();
+    initIncomePage();
+    initExpensesPage();
+    initBudgetsPage();
+    initSavingsPage();
+    initInvestmentsPage();
+    initLoansPage();
+    initBillsPage();
+
+    // Final Modules
+    initAnalyticsPage();
+    initReportsPage();
+    initNotificationsPage();
+    initCalendarPage();
+    initProfilePage();
+    initSettingsPage();
+
+    // Interface Polish
+    initCommandPalette();
+    initPolish();
+
+    // Initialize Navbar Mobile Drawer (landing index.html page specific)
+    initMobileNavbar();
+  } catch (err) {
+    console.error('FinTrack Pro initialization error:', err);
+  } finally {
+    // Always dismiss the preloader, even on error
+    clearTimeout(preloaderSafetyTimeout);
+    dismissPreloaderSafely();
+  }
 });
 
 function initMobileNavbar() {
