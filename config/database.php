@@ -10,6 +10,6 @@ return [
     'port' => $_ENV['DB_PORT'] ?? '5432',
     'database' => $_ENV['DB_DATABASE'] ?? 'fintrack_db',
     'username' => $_ENV['DB_USERNAME'] ?? 'postgres',
-    'password' => $_ENV['DB_PASSWORD'] ?? '',
-    'sslmode' => $_ENV['DB_SSLMODE'] ?? 'require',
+    'password' => $_ENV['DB_PASSWORD'] ?? null,
+    'sslmode' => $_ENV['DB_SSLMODE'] ?? 'prefer',
 ];

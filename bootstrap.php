@@ -18,8 +18,8 @@ if (!file_exists($autoloader)) {
     echo json_encode([
         'success' => false,
         'message' => 'Composer dependencies not installed. Please run "composer install" in the project root.',
-        'data'    => null,
-        'errors'  => ['composer_missing' => 'vendor/autoload.php not found']
+        'data' => null,
+        'errors' => ['composer_missing' => 'vendor/autoload.php not found']
     ]);
     exit;
 }
@@ -40,7 +40,7 @@ if (!function_exists('config')) {
         static $configs = [];
         $parts = explode('.', $key);
         $file = array_shift($parts);
-        
+
         if (!isset($configs[$file])) {
             $filePath = __DIR__ . '/config/' . $file . '.php';
             if (file_exists($filePath)) {
@@ -49,7 +49,7 @@ if (!function_exists('config')) {
                 $configs[$file] = [];
             }
         }
-        
+
         $value = $configs[$file];
         foreach ($parts as $part) {
             if (is_array($value) && array_key_exists($part, $value)) {
@@ -58,7 +58,7 @@ if (!function_exists('config')) {
                 return $default;
             }
         }
-        
+
         return $value;
     }
 }
@@ -78,7 +78,7 @@ date_default_timezone_set(config('app.timezone', 'UTC'));
 
 // 5. Centralized Error & Exception Handling
 // Set reporting options
-$isDebug = (bool)config('app.debug', false);
+$isDebug = (bool) config('app.debug', false);
 if ($isDebug) {
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
@@ -93,9 +93,9 @@ set_exception_handler(function (Throwable $exception) use ($isDebug) {
     App\Helpers\Logger::error(
         $exception->getMessage(),
         [
-            'file'  => $exception->getFile(),
-            'line'  => $exception->getLine(),
-            'code'  => $exception->getCode(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'code' => $exception->getCode(),
             'trace' => $exception->getTraceAsString()
         ]
     );
@@ -106,12 +106,12 @@ set_exception_handler(function (Throwable $exception) use ($isDebug) {
     }
 
     $message = $isDebug ? $exception->getMessage() : 'A server error occurred.';
-    $errors  = [];
-    
+    $errors = [];
+
     if ($isDebug) {
         $errors = [
-            'file'  => $exception->getFile(),
-            'line'  => $exception->getLine(),
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
             'trace' => explode("\n", $exception->getTraceAsString())
         ];
     }
@@ -131,23 +131,23 @@ set_error_handler(function (int $errno, string $errstr, string $errfile, int $er
 if (session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', '1');
     ini_set('session.use_only_cookies', '1');
-    
+
     // Resolve HTTPS state dynamically
-    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
+    $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || ($_SERVER['SERVER_PORT'] ?? '') === '443';
-    
+
     ini_set('session.cookie_secure', $isSecure ? '1' : '0');
-    
+
     if (PHP_VERSION_ID >= 70300) {
         session_set_cookie_params([
-            'lifetime' => (int)config('constants.auth.session_lifetime_seconds', 7200),
-            'path'     => '/',
-            'domain'   => '',
-            'secure'   => $isSecure,
+            'lifetime' => (int) config('constants.auth.session_lifetime_seconds', 7200),
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
             'httponly' => true,
             'samesite' => 'Lax'
         ]);
     }
-    
+
     session_start();
 }
