@@ -1,10 +1,8 @@
 /**
- * FinTrack Pro - Investments Controller (Phase 2)
+ * FinTrack Pro - Investments Controller (Phase 5)
  */
 
-import { showToast } from './utils.js';
-
-const INVEST_STORAGE_KEY = 'fintrack_investments_v1';
+import { showToast, fetchApi } from './utils.js';
 
 let investmentsList = [];
 let currentPage = 1;
@@ -12,31 +10,33 @@ const itemsPerPage = 8;
 let searchQuery = '';
 let selectedCategory = 'all';
 
-export function initInvestmentsPage() {
+export async function initInvestmentsPage() {
   const isInvestmentsPage = document.querySelector('.investments-page-layout');
   if (!isInvestmentsPage) return;
 
   console.warn("Initializing Investments Module...");
 
-  loadInvestmentsData();
   setupEventListeners();
+  await loadInvestmentsData();
   renderInvestmentsPage();
 }
 
-function loadInvestmentsData() {
-  const data = localStorage.getItem(INVEST_STORAGE_KEY);
-  if (data) {
-    try { investmentsList = JSON.parse(data); } catch (e) { investmentsList = []; }
-  } else {
-    investmentsList = [
-      { id: 1, name: 'HDFC Equity Growth Fund', category: 'mutualfunds', invested: 45000.00, current: 52400.00 }
-    ];
-    localStorage.setItem(INVEST_STORAGE_KEY, JSON.stringify(investmentsList));
-  }
-}
+async function loadInvestmentsData() {
+  try {
+    const response = await fetchApi('/api/investments');
+    if (!response) return;
 
-function saveInvestmentsData() {
-  localStorage.setItem(INVEST_STORAGE_KEY, JSON.stringify(investmentsList));
+    const result = await response.json();
+    if (result && result.success && result.data) {
+      investmentsList = result.data.investments || [];
+    } else {
+      investmentsList = [];
+      showToast(result?.message || "Failed to load investments.", "danger", "API Error");
+    }
+  } catch (err) {
+    console.error("Failed to load investments:", err);
+    showToast("Error connecting to server to load portfolio.", "danger", "API Connection Error");
+  }
 }
 
 function renderInvestmentsPage() {
@@ -54,8 +54,8 @@ function renderMetrics() {
   let totalCurrent = 0;
 
   investmentsList.forEach(item => {
-    totalInvested += item.invested;
-    totalCurrent += item.current;
+    totalInvested += parseFloat(item.invested_amount || 0);
+    totalCurrent += parseFloat(item.current_value || 0);
   });
 
   const netProfit = totalCurrent - totalInvested;
@@ -81,10 +81,21 @@ function renderTable() {
 
   tbody.innerHTML = '';
 
+  const reverseMap = {
+    'stock': 'stocks',
+    'mutual_fund': 'mutualfunds',
+    'gold': 'gold',
+    'crypto': 'crypto',
+    'other': 'others'
+  };
+
   let filtered = investmentsList.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCat = selectedCategory === 'all' || item.category === selectedCategory;
+    const matchesSearch = (item.asset_name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (item.asset_type || '').toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const dbCat = item.asset_type;
+    const filterCat = reverseMap[dbCat] || dbCat;
+    const matchesCat = selectedCategory === 'all' || filterCat === selectedCategory;
     return matchesSearch && matchesCat;
   });
 
@@ -125,19 +136,30 @@ function renderTable() {
     return;
   }
 
+  const categoryDisplayNames = {
+    'stock': 'Equity Stocks',
+    'mutual_fund': 'Mutual Funds',
+    'gold': 'Gold & Commodities',
+    'crypto': 'Cryptocurrency',
+    'other': 'Other Assets'
+  };
+
   paginated.forEach(item => {
-    const profit = item.current - item.invested;
-    const roi = item.invested > 0 ? ((profit / item.invested) * 100) : 0;
+    const invested = parseFloat(item.invested_amount || 0);
+    const current = parseFloat(item.current_value || 0);
+    const profit = current - invested;
+    const roi = parseFloat(item.roi || 0);
     const textClass = profit >= 0 ? 'text-success' : 'text-danger';
+    const displayCat = categoryDisplayNames[item.asset_type] || item.asset_type;
 
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid var(--border-color)';
 
     tr.innerHTML = `
-      <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary);">${escapeHTML(item.name)}</td>
-      <td style="padding: 1rem 1.25rem; text-transform: uppercase;"><span class="badge badge-primary">${item.category}</span></td>
-      <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right;">₹${item.invested.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-      <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right; color: var(--text-primary);">₹${item.current.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+      <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary);">${escapeHTML(item.asset_name)}</td>
+      <td style="padding: 1rem 1.25rem; text-transform: uppercase;"><span class="badge badge-primary">${escapeHTML(displayCat)}</span></td>
+      <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right;">₹${invested.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+      <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right; color: var(--text-primary);">₹${current.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
       <td style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;" class="${textClass}">
         ${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%
       </td>
@@ -159,7 +181,7 @@ function renderTable() {
   tbody.querySelectorAll('.edit-asset-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       openEditModal(id);
     });
   });
@@ -167,7 +189,7 @@ function renderTable() {
   tbody.querySelectorAll('.delete-asset-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       deleteAsset(id);
     });
   });
@@ -205,8 +227,8 @@ function setupEventListeners() {
   }
 
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', () => {
-      loadInvestmentsData();
+    refreshBtn.addEventListener('click', async () => {
+      await loadInvestmentsData();
       renderInvestmentsPage();
       showToast("Investment portfolios synced.", "success", "Portfolio Synced");
     });
@@ -248,7 +270,7 @@ function setupEventListeners() {
   }
 
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const id = document.getElementById('assetId').value;
@@ -262,27 +284,40 @@ function setupEventListeners() {
         return;
       }
 
-      if (id) {
-        const index = investmentsList.findIndex(x => x.id === parseInt(id));
-        if (index !== -1) {
-          investmentsList[index] = { ...investmentsList[index], name, category, invested, current };
-          showToast(`Asset details updated for "${name}".`, "success", "Portfolio Updated");
-        }
-      } else {
-        const newAsset = {
-          id: Date.now(),
-          name,
-          category,
-          invested,
-          current
-        };
-        investmentsList.push(newAsset);
-        showToast(`Asset holding locked for "${name}".`, "success", "Portfolio Logged");
-      }
+      const payload = {
+        asset_name: name,
+        asset_type: category,
+        invested_amount: invested,
+        current_value: current
+      };
 
-      saveInvestmentsData();
-      renderInvestmentsPage();
-      closeModal();
+      try {
+        let response;
+        if (id) {
+          response = await fetchApi(`/api/investments/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await fetchApi('/api/investments', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (response && response.ok) {
+          showToast(id ? `Asset details updated for "${name}".` : `Asset holding locked for "${name}".`, "success", id ? "Portfolio Updated" : "Portfolio Logged");
+          await loadInvestmentsData();
+          renderInvestmentsPage();
+          closeModal();
+        } else {
+          const resJson = response ? await response.json() : null;
+          showToast(resJson?.message || "Failed to log asset.", "danger", "Error");
+        }
+      } catch (err) {
+        console.error("Save investment error:", err);
+        showToast("Failed to connect to server.", "danger", "Network Error");
+      }
     });
   }
 }
@@ -291,12 +326,20 @@ function openEditModal(id) {
   const item = investmentsList.find(x => x.id === id);
   if (!item) return;
 
+  const reverseMap = {
+    'stock': 'stocks',
+    'mutual_fund': 'mutualfunds',
+    'gold': 'gold',
+    'crypto': 'crypto',
+    'other': 'others'
+  };
+
   document.getElementById('modalTitle').textContent = 'Modify Investment Asset';
   document.getElementById('assetId').value = item.id;
-  document.getElementById('assetName').value = item.name;
-  document.getElementById('assetCategory').value = item.category;
-  document.getElementById('assetInvested').value = item.invested;
-  document.getElementById('assetCurrent').value = item.current;
+  document.getElementById('assetName').value = item.asset_name;
+  document.getElementById('assetCategory').value = reverseMap[item.asset_type] || item.asset_type;
+  document.getElementById('assetInvested').value = item.invested_amount;
+  document.getElementById('assetCurrent').value = item.current_value;
 
   const modal = document.getElementById('investmentModal');
   if (modal) {
@@ -305,18 +348,30 @@ function openEditModal(id) {
   }
 }
 
-function deleteAsset(id) {
+async function deleteAsset(id) {
   if (confirm("Are you sure you want to delete this asset log?")) {
     const item = investmentsList.find(x => x.id === id);
-    const name = item ? item.name : '';
-    investmentsList = investmentsList.filter(x => x.id !== id);
-    saveInvestmentsData();
-    renderInvestmentsPage();
-    showToast(`Asset log for "${name}" deleted.`, "warning", "Portfolio Log Removed");
+    const name = item ? item.asset_name : '';
+    try {
+      const response = await fetchApi(`/api/investments/${id}`, {
+        method: 'DELETE'
+      });
+      if (response && response.ok) {
+        showToast(`Asset log for "${name}" deleted.`, "warning", "Portfolio Log Removed");
+        await loadInvestmentsData();
+        renderInvestmentsPage();
+      } else {
+        showToast("Failed to delete asset log.", "danger", "Error");
+      }
+    } catch (err) {
+      console.error("Delete asset error:", err);
+      showToast("Error connecting to server.", "danger", "Network Error");
+    }
   }
 }
 
 function escapeHTML(str) {
+  if (!str) return '';
   return str.replace(/[&<>'"]/g, 
     tag => ({
       '&': '&amp;',

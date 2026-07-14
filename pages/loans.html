@@ -340,6 +340,48 @@
     </div>
   </div>
 
+  <!-- EMI SCHEDULE MODAL -->
+  <div class="modal-backdrop" id="emiModal" role="dialog" aria-modal="true" aria-labelledby="emiModalTitle">
+    <div class="modal-content" style="max-width: 700px; width: 90%;">
+      <div class="modal-header">
+        <h4 class="modal-title" id="emiModalTitle">EMI Payment Schedule</h4>
+        <button class="toast-close" id="closeEmiModalBtn" aria-label="Close modal"><i data-lucide="x"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex justify-between align-center" style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h3 id="emiLoanName" style="font-family: var(--font-display); font-weight: 700; margin: 0; font-size: 1.25rem;">Loan Name</h3>
+            <span id="emiLenderName" style="color: var(--text-muted); font-size: var(--fs-xs);">Lender Name</span>
+          </div>
+          <div style="text-align: right;">
+            <div id="emiRemainingBal" style="font-size: 1.25rem; font-weight: 800; color: var(--color-danger);">₹0.00</div>
+            <span style="font-size: 9px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Remaining Balance</span>
+          </div>
+        </div>
+        <div style="max-height: 350px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: var(--fs-xs);">
+            <thead>
+              <tr style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); font-weight: 700;">
+                <th style="padding: 0.75rem 1rem;">Installment</th>
+                <th style="padding: 0.75rem 1rem;">Due Date</th>
+                <th style="padding: 0.75rem 1rem; text-align: right;">Amount</th>
+                <th style="padding: 0.75rem 1rem; text-align: center;">Status</th>
+                <th style="padding: 0.75rem 1rem; text-align: center;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="emiTableBody">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="closeEmiModalFooterBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Entry Script -->
   <script type="module" src="../assets/js/app.js"></script>
 </body>
