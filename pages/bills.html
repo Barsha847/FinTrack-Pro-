@@ -334,6 +334,33 @@
               <div class="error-message"></div>
             </div>
           </div>
+          <div class="grid-12" style="margin-top: 1rem;">
+            <div class="col-12 col-md-4 form-group">
+              <label class="form-label" for="billLeadDays">Remind Lead (Days)</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="bell"></i>
+                <input type="number" id="billLeadDays" class="form-control has-icon" value="3" min="0" required>
+              </div>
+              <div class="error-message"></div>
+            </div>
+            <div class="col-12 col-md-4 form-group" style="display: flex; align-items: center; justify-content: start; gap: 8px;">
+              <input type="checkbox" id="billRecurring" style="width: 18px; height: 18px; margin-top: 1.5rem; cursor: pointer;">
+              <label class="form-label" for="billRecurring" style="margin-top: 1.5rem; cursor: pointer; user-select: none;">Is Recurring</label>
+            </div>
+            <div class="col-12 col-md-4 form-group" id="billFrequencyGroup" style="display: none;">
+              <label class="form-label" for="billFrequency">Frequency</label>
+              <div class="form-control-wrapper">
+                <i data-lucide="refresh-cw"></i>
+                <select id="billFrequency" class="form-control has-icon">
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly" selected>Monthly</option>
+                  <option value="quarterly">Quarterly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
+              <div class="error-message"></div>
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="cancelModalBtn">Cancel</button>

@@ -194,58 +194,7 @@ function renderTransactionsList() {
 }
 
 function renderNotificationsList() {
-  const container = document.getElementById('notificationsContainer');
-  const badgeDot = document.getElementById('notificationBadgeDot');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  const unreadCount = DashboardState.notifications.filter(n => n.unread).length;
-  if (badgeDot) {
-    badgeDot.style.display = unreadCount > 0 ? 'block' : 'none';
-  }
-
-  DashboardState.notifications.forEach(notif => {
-    const item = document.createElement('div');
-    item.className = `notification-item ${notif.unread ? 'unread' : ''}`;
-    
-    let iconName = 'info';
-    let iconBg = 'var(--color-primary-light)';
-    let iconColor = 'var(--color-primary)';
-
-    if (notif.type === 'overrun') {
-      iconName = 'alert-triangle';
-      iconBg = 'var(--color-danger-light)';
-      iconColor = 'var(--color-danger)';
-    } else if (notif.type === 'reminder') {
-      iconName = 'calendar-clock';
-      iconBg = 'var(--color-warning-light)';
-      iconColor = 'var(--color-warning)';
-    }
-
-    item.innerHTML = `
-      <div class="notification-item-icon" style="background-color: ${iconBg}; color: ${iconColor};">
-        <i data-lucide="${iconName}"></i>
-      </div>
-      <div class="notification-item-content">
-        <div class="notification-item-title">${escapeHTML(notif.title)}</div>
-        <div class="notification-item-desc">${escapeHTML(notif.desc)}</div>
-        <div class="notification-item-time">${notif.time}</div>
-      </div>
-    `;
-
-    // Click marks as read
-    item.addEventListener('click', () => {
-      if (notif.unread) {
-        notif.unread = false;
-        renderNotificationsList();
-      }
-    });
-
-    container.appendChild(item);
-  });
-
-  if (window.lucide) window.lucide.createIcons();
+  // Handled globally in utils.js
 }
 
 function renderBudgetBars() {
@@ -270,49 +219,7 @@ function renderBudgetBars() {
 // ==========================================
 
 function setupDropdowns() {
-  const notifBtn = document.getElementById('notificationTriggerBtn');
-  const notifMenu = document.getElementById('notificationDropdown');
-  
-  const profileBtn = document.getElementById('profileTriggerBtn');
-  const profileMenu = document.getElementById('profileDropdown');
-
-  // Toggle Notifications
-  if (notifBtn && notifMenu) {
-    notifBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      notifMenu.classList.toggle('show');
-      if (profileMenu) profileMenu.classList.remove('show');
-      
-      // Mark all notifications as read when opening dropdown
-      setTimeout(() => {
-        DashboardState.notifications.forEach(n => n.unread = false);
-        renderNotificationsList();
-      }, 1000);
-    });
-  }
-
-  // Toggle Profile
-  if (profileBtn && profileMenu) {
-    profileBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      profileMenu.classList.toggle('show');
-      if (notifMenu) notifMenu.classList.remove('show');
-    });
-  }
-
-  // Close menus when clicking outside
-  document.addEventListener('click', () => {
-    if (notifMenu) notifMenu.classList.remove('show');
-    if (profileMenu) profileMenu.classList.remove('show');
-  });
-
-  // Prevent dropdown closing when clicking inside menu card
-  const dropdownCards = document.querySelectorAll('.dropdown-menu');
-  dropdownCards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  });
+  // Handled globally in utils.js
 }
 
 // ==========================================

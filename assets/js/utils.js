@@ -206,9 +206,141 @@ export function syncUserProfile() {
   if (dropdownEmail) dropdownEmail.textContent = email;
 
   const headerAvatars = document.querySelectorAll('#profileTriggerBtn .avatar, #profileDropdown .avatar');
-  headerAvatars.forEach(el => {
+    headerAvatars.forEach(el => {
     el.textContent = initials;
   });
+}
+
+/**
+ * Escapes HTML characters to prevent XSS.
+ */
+export function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Global Topbar Notifications dropdown and badge sync
+ */
+export function initGlobalNotifications() {
+  const notifBtn = document.getElementById('notificationTriggerBtn');
+  if (!notifBtn) return;
+
+  const notifMenu = document.getElementById('notificationDropdown');
+  const badgeDot = document.getElementById('notificationBadgeDot');
+  const profileBtn = document.getElementById('profileTriggerBtn');
+  const profileMenu = document.getElementById('profileDropdown');
+
+  if (notifBtn && notifMenu) {
+    notifBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      notifMenu.classList.toggle('show');
+      if (profileMenu) profileMenu.classList.remove('show');
+
+      if (notifMenu.classList.contains('show')) {
+        await loadTopbarNotifications();
+        try {
+          await fetchApi('/api/notifications/read-all', { method: 'PUT' });
+          if (badgeDot) badgeDot.style.display = 'none';
+        } catch (err) {
+          console.error("Failed to mark notifications as read:", err);
+        }
+      }
+    });
+  }
+
+  if (profileBtn && profileMenu) {
+    profileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle('show');
+      if (notifMenu) notifMenu.classList.remove('show');
+    });
+  }
+
+  document.addEventListener('click', () => {
+    if (notifMenu) notifMenu.classList.remove('show');
+    if (profileMenu) profileMenu.classList.remove('show');
+  });
+
+  async function updateUnreadBadge() {
+    try {
+      const response = await fetchApi('/api/notifications/unread-count');
+      if (response && response.ok) {
+        const res = await response.json();
+        const count = res.data.unread_count || 0;
+        if (badgeDot) {
+          badgeDot.style.display = count > 0 ? 'block' : 'none';
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update unread badge:", err);
+    }
+  }
+
+  async function loadTopbarNotifications() {
+    const listContainer = document.getElementById('notificationsContainer');
+    if (!listContainer) return;
+
+    listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; font-size: 11px; color: var(--text-muted);">Loading alerts...</div>';
+
+    try {
+      const response = await fetchApi('/api/notifications?limit=5');
+      if (!response) return;
+
+      const res = await response.json();
+      const list = res.data.notifications || [];
+
+      listContainer.innerHTML = '';
+      if (list.length === 0) {
+        listContainer.innerHTML = '<div style="padding: 1.5rem 1rem; text-align: center; font-size: 11px; color: var(--text-muted);">No new alerts</div>';
+        return;
+      }
+
+      list.forEach(notif => {
+        const item = document.createElement('div');
+        item.className = `notification-item ${!notif.is_read ? 'unread' : ''}`;
+        
+        let iconName = 'info';
+        let iconBg = 'var(--color-primary-light)';
+        let iconColor = 'var(--color-primary)';
+
+        if (notif.type.startsWith('budget')) {
+          iconName = 'alert-triangle';
+          iconBg = 'var(--color-danger-light)';
+          iconColor = 'var(--color-danger)';
+        } else if (notif.type.startsWith('bill')) {
+          iconName = 'calendar';
+          iconBg = 'var(--color-warning-light)';
+          iconColor = 'var(--color-warning)';
+        }
+
+        item.innerHTML = `
+          <div class="notification-item-icon" style="background-color: ${iconBg}; color: ${iconColor};">
+            <i data-lucide="${iconName}"></i>
+          </div>
+          <div class="notification-item-content">
+            <div class="notification-item-title">${escapeHTML(notif.title)}</div>
+            <div class="notification-item-desc">${escapeHTML(notif.message)}</div>
+            <div class="notification-item-time">${notif.time_ago || 'just now'}</div>
+          </div>
+        `;
+        listContainer.appendChild(item);
+      });
+
+      if (window.lucide) window.lucide.createIcons();
+    } catch (err) {
+      console.error("Failed to load topbar notifications:", err);
+      listContainer.innerHTML = '<div style="padding: 1rem; text-align: center; font-size: 11px; color: var(--color-danger);">Failed to load alerts</div>';
+    }
+  }
+
+  // Initial sync
+  updateUnreadBadge();
 }
 
 /**
@@ -273,7 +405,10 @@ export async function fetchApi(url, options = {}) {
     
     if (response.status === 401 && !url.includes('/api/auth/me') && !url.includes('/api/auth/login')) {
       sessionStorage.clear();
-      window.location.href = getRoutePath('login');
+      const loginPath = getRoutePath('login');
+      if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('/login')) {
+        window.location.href = loginPath;
+      }
       return null;
     }
     

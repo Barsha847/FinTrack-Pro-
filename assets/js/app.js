@@ -7,7 +7,7 @@ import { initSidebar } from './sidebar.js';
 import { initNavigation } from './navigation.js';
 import { initValidation } from './validation.js';
 import { initAnimations } from './animation.js';
-import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast, checkPageAuth } from './utils.js';
+import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast, checkPageAuth, initGlobalNotifications } from './utils.js';
 import { initDashboard } from './dashboard.js';
 import { initIncomePage } from './income.js';
 import { initExpensesPage } from './expenses.js';
@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Global QA & UX Systems
     syncUserProfile();
+    initGlobalNotifications();
     setupLogout();
     initGlobalModalManager();
     initContactForm();

@@ -66,6 +66,9 @@ class MailService
      */
     public function sendVerificationOtp(string $toEmail, string $toName, string $otpCode): bool
     {
+        if (str_ends_with(strtolower($toEmail), '.test')) {
+            return true;
+        }
         try {
             $mail = $this->createMailer();
             $mail->addAddress($toEmail, $toName);
@@ -122,6 +125,9 @@ class MailService
      */
     public function sendPasswordResetLink(string $toEmail, string $toName, string $resetToken): bool
     {
+        if (str_ends_with(strtolower($toEmail), '.test')) {
+            return true;
+        }
         try {
             $mail = $this->createMailer();
             $mail->addAddress($toEmail, $toName);
@@ -170,6 +176,65 @@ class MailService
                 $safeMsg = str_replace($smtpPass, '********', $safeMsg);
             }
             Logger::error("SMTP Password Reset Email failed: " . $safeMsg);
+            return false;
+        }
+    }
+
+    /**
+     * Send email with Bill Reminder or Overdue notification details.
+     */
+    public function sendBillNotificationEmail(string $toEmail, string $toName, string $billName, string $dueDate, float $amount, bool $isOverdue): bool
+    {
+        if (str_ends_with(strtolower($toEmail), '.test')) {
+            return true;
+        }
+        try {
+            $mail = $this->createMailer();
+            $mail->addAddress($toEmail, $toName);
+            $mail->Subject = $isOverdue ? "Overdue Bill Alert: {$billName}" : "Upcoming Bill Reminder: {$billName}";
+
+            $formattedAmount = number_format($amount, 2);
+            $statusText = $isOverdue ? "is OVERDUE" : "is upcoming";
+            $color = $isOverdue ? "#ef4444" : "#f59e0b";
+
+            $body = "
+            <div style=\"font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f9fafb; padding: 30px; max-width: 600px; margin: 0 auto; border-radius: 12px; border: 1px solid #e5e7eb;\">
+                <div style=\"text-align: center; margin-bottom: 25px;\">
+                    <h2 style=\"color: #4f46e5; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;\">FinTrack <span style=\"color: #10b981;\">Pro</span></h2>
+                </div>
+                <div style=\"background: #ffffff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); border: 1px solid #f3f4f6;\">
+                    <h3 style=\"color: #111827; font-size: 20px; font-weight: 700; margin-top: 0; margin-bottom: 15px; text-align: center;\">" . ($isOverdue ? "Overdue Bill Warning" : "Upcoming Bill Reminder") . "</h3>
+                    <p style=\"color: #4b5563; font-size: 15px; line-height: 24px; margin-bottom: 25px; text-align: center;\">
+                        This is a notification that your bill <strong>{$billName}</strong> {$statusText}.
+                    </p>
+                    
+                    <div style=\"background-color: #f3f4f6; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 25px;\">
+                        <span style=\"font-size: 24px; font-weight: 800; color: {$color};\">₹{$formattedAmount}</span><br>
+                        <span style=\"font-size: 13px; color: #6b7280;\">Due Date: {$dueDate}</span>
+                    </div>
+
+                    <p style=\"color: #9ca3af; font-size: 12px; text-align: center; line-height: 18px; margin: 0;\">Please log in to your dashboard to record the payment transaction.</p>
+                </div>
+                <div style=\"text-align: center; margin-top: 25px; color: #9ca3af; font-size: 11px;\">
+                    © " . date('Y') . " FinTrack Pro. Secure Personal Finance Dashboard.
+                </div>
+            </div>
+            ";
+
+            $mail->Body = $body;
+            $mail->AltBody = "This is a notification that your bill '{$billName}' of ₹{$formattedAmount} " . ($isOverdue ? "is OVERDUE since {$dueDate}" : "is due on {$dueDate}") . ".";
+            
+            return $mail->send();
+        } catch (\Throwable $e) {
+            if (str_contains($e->getMessage(), 'Required SMTP settings')) {
+                throw $e;
+            }
+            $safeMsg = $e->getMessage();
+            $smtpPass = $_ENV['MAIL_PASSWORD'] ?? '';
+            if ($smtpPass !== '') {
+                $safeMsg = str_replace($smtpPass, '********', $safeMsg);
+            }
+            Logger::error("SMTP Bill Notification Email failed: " . $safeMsg);
             return false;
         }
     }

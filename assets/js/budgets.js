@@ -1,15 +1,11 @@
 /**
- * FinTrack Pro - Budgets Controller (Phase 2)
+ * FinTrack Pro - Budgets Controller (Phase 6)
  */
 
-import { showToast } from './utils.js';
-
-// LocalStorage Namespaces
-const BUDGET_STORAGE_KEY = 'fintrack_budgets_v1';
-const TX_STORAGE_KEY = 'fintrack_transactions_v1';
+import { showToast, fetchApi, escapeHTML } from './utils.js';
 
 let budgetsList = [];
-let expensesList = [];
+let categoriesList = [];
 let currentPage = 1;
 const itemsPerPage = 8;
 
@@ -21,36 +17,55 @@ export function initBudgetsPage() {
 
   loadBudgetData();
   setupEventListeners();
-  renderBudgetsPage();
 }
 
-function loadBudgetData() {
-  // Load budgets list
-  const data = localStorage.getItem(BUDGET_STORAGE_KEY);
-  if (data) {
-    try { budgetsList = JSON.parse(data); } catch (e) { budgetsList = []; }
-  } else {
-    budgetsList = [
-      { id: 1, category: 'food', limit: 12000.00 },
-      { id: 2, category: 'bills', limit: 8000.00 }
-    ];
-    localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(budgetsList));
-  }
-
-  // Load transactions for spent calculation
-  const txData = localStorage.getItem(TX_STORAGE_KEY);
-  if (txData) {
-    try {
-      const allTx = JSON.parse(txData);
-      expensesList = allTx.filter(tx => tx.type === 'expense');
-    } catch (e) {
-      expensesList = [];
+async function loadBudgetData() {
+  try {
+    // 1. Fetch categories
+    const catResponse = await fetchApi('/api/categories?type=expense');
+    if (catResponse && catResponse.ok) {
+      const catRes = await catResponse.json();
+      categoriesList = catRes.data.categories || [];
+      populateCategorySelects();
     }
+
+    // 2. Fetch budgets
+    const response = await fetchApi('/api/budgets');
+    if (!response) return;
+
+    const result = await response.json();
+    if (result && result.success) {
+      budgetsList = (result.data.budgets || []).map(b => ({
+        id: b.id,
+        category_id: b.category_id,
+        category: b.category_name,
+        limit: parseFloat(b.amount),
+        spent: parseFloat(b.spent || 0),
+        progress_percent: parseFloat(b.progress_percent || 0)
+      }));
+      renderBudgetsPage();
+    } else {
+      budgetsList = [];
+      showToast(result?.message || "Failed to load budget limits.", "danger", "API Error");
+      renderBudgetsPage();
+    }
+  } catch (err) {
+    console.error("Failed to load budgets:", err);
+    showToast("Error connecting to server to load budget targets.", "danger", "API Connection Error");
   }
 }
 
-function saveBudgetData() {
-  localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(budgetsList));
+function populateCategorySelects() {
+  const select = document.getElementById('budgetCategory');
+  if (!select) return;
+
+  select.innerHTML = '';
+  categoriesList.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = cat.name;
+    select.appendChild(opt);
+  });
 }
 
 function renderBudgetsPage() {
@@ -68,32 +83,20 @@ function renderMetrics() {
   let totalSpent = 0;
   let overrunCount = 0;
 
-  // Calculate spent per category
-  const spentByCat = {};
-  expensesList.forEach(item => {
-    spentByCat[item.category] = (spentByCat[item.category] || 0) + item.amount;
-  });
-
   budgetsList.forEach(item => {
     totalLimit += item.limit;
-    const spent = spentByCat[item.category] || 0;
-    totalSpent += spent;
-
-    if (spent > item.limit) {
+    totalSpent += item.spent;
+    if (item.spent > item.limit) {
       overrunCount++;
     }
   });
 
-  if (countEl) countEl.textContent = `${budgetsList.length} Budgets`;
+  if (countEl) countEl.textContent = `${budgetsList.length} Budget${budgetsList.length !== 1 ? 's' : ''}`;
   if (limitEl) limitEl.textContent = '₹' + totalLimit.toLocaleString('en-IN', { minimumFractionDigits: 2 });
   if (spentEl) spentEl.textContent = '₹' + totalSpent.toLocaleString('en-IN', { minimumFractionDigits: 2 });
   if (overrunEl) {
     overrunEl.textContent = overrunCount > 0 ? `${overrunCount} Category${overrunCount > 1 ? 's' : ''}` : '0 Categories';
-    if (overrunCount > 0) {
-      overrunEl.className = 'stats-value text-danger';
-    } else {
-      overrunEl.className = 'stats-value';
-    }
+    overrunEl.className = overrunCount > 0 ? 'stats-value text-danger' : 'stats-value';
   }
 }
 
@@ -102,12 +105,6 @@ function renderTable() {
   if (!tbody) return;
 
   tbody.innerHTML = '';
-
-  // Calculate spent per category
-  const spentByCat = {};
-  expensesList.forEach(item => {
-    spentByCat[item.category] = (spentByCat[item.category] || 0) + item.amount;
-  });
 
   const totalItems = budgetsList.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
@@ -147,18 +144,23 @@ function renderTable() {
   }
 
   paginated.forEach(item => {
-    const spent = spentByCat[item.category] || 0;
-    const ratio = Math.min((spent / item.limit) * 100, 100);
-    const ratioRounded = Math.round((spent / item.limit) * 100);
+    const ratio = Math.min((item.spent / item.limit) * 100, 100);
+    const ratioRounded = Math.round((item.spent / item.limit) * 100);
     
-    // Choose status badges
+    // Choose status colors
     let barColor = 'linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end))';
     let textClass = 'text-primary';
-    if (spent > item.limit) {
+    if (item.spent > item.limit) {
       barColor = 'var(--color-danger)';
       textClass = 'text-danger';
-    } else if (spent > item.limit * 0.7) {
+    } else if (item.spent > item.limit * 0.9) {
+      barColor = 'var(--color-danger-light)';
+      textClass = 'text-danger';
+    } else if (item.spent > item.limit * 0.75) {
       barColor = 'var(--color-warning)';
+      textClass = 'text-warning';
+    } else if (item.spent > item.limit * 0.5) {
+      barColor = 'var(--color-warning-light)';
       textClass = 'text-warning';
     }
 
@@ -166,9 +168,9 @@ function renderTable() {
     tr.style.borderBottom = '1px solid var(--border-color)';
 
     tr.innerHTML = `
-      <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary); text-transform: capitalize;">${item.category}</td>
+      <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary); text-transform: capitalize;">${escapeHTML(item.category)}</td>
       <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right;">₹${item.limit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-      <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right;" class="${textClass}">₹${spent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+      <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right;" class="${textClass}">₹${item.spent.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
       <td style="padding: 1rem 1.25rem; text-align: center;">
         <div class="d-flex align-center gap-2">
           <div style="flex: 1; height: 8px; background-color: var(--bg-secondary); border-radius: var(--radius-full); overflow: hidden;">
@@ -195,7 +197,7 @@ function renderTable() {
   tbody.querySelectorAll('.edit-budget-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       openEditModal(id);
     });
   });
@@ -203,7 +205,7 @@ function renderTable() {
   tbody.querySelectorAll('.delete-budget-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       deleteBudget(id);
     });
   });
@@ -225,7 +227,6 @@ function setupEventListeners() {
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
       loadBudgetData();
-      renderBudgetsPage();
       showToast("Budget thresholds recalculated against real expenses.", "success", "Synced Limits");
     });
   }
@@ -265,43 +266,62 @@ function setupEventListeners() {
   }
 
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const id = document.getElementById('budgetId').value;
-      const category = document.getElementById('budgetCategory').value;
+      const categoryId = document.getElementById('budgetCategory').value;
       const limit = parseFloat(document.getElementById('budgetLimit').value);
 
-      if (isNaN(limit) || limit <= 0) {
-        showToast("Please enter a valid limit.", "danger", "Validation Error");
+      if (!categoryId) {
+        showToast("Please configure target categories first.", "danger", "Configuration Error");
         return;
       }
 
-      if (id) {
-        const index = budgetsList.findIndex(x => x.id === parseInt(id));
-        if (index !== -1) {
-          budgetsList[index] = { ...budgetsList[index], category, limit };
-          showToast(`Budget limit updated for "${category}".`, "success", "Limit Updated");
-        }
-      } else {
-        // Prevent duplicate category limits
-        if (budgetsList.some(b => b.category === category)) {
-          showToast(`A budget limit for "${category}" already exists.`, "danger", "Limit Configuration Error");
-          return;
-        }
-
-        const newBudget = {
-          id: Date.now(),
-          category,
-          limit
-        };
-        budgetsList.push(newBudget);
-        showToast(`Budget limit configured for "${category}".`, "success", "Limit Configured");
+      if (isNaN(limit) || limit <= 0) {
+        showToast("Please enter a valid limit amount.", "danger", "Validation Error");
+        return;
       }
 
-      saveBudgetData();
-      renderBudgetsPage();
-      closeModal();
+      // Configure current month/year
+      const currentMonth = new Date().getMonth() + 1;
+      const currentYear = new Date().getFullYear();
+
+      const payload = {
+        category_id: categoryId,
+        amount: limit,
+        budget_month: currentMonth,
+        budget_year: currentYear
+      };
+
+      try {
+        let response;
+        if (id) {
+          response = await fetchApi(`/api/budgets/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await fetchApi('/api/budgets', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (response && response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            showToast(id ? "Budget limit updated successfully." : "Budget limit configured successfully.", "success", "Success");
+            loadBudgetData();
+            closeModal();
+          } else {
+            showToast(result.message || "Operation failed.", "danger", "API Error");
+          }
+        }
+      } catch (err) {
+        console.error("Budget submit failed:", err);
+        showToast("Server connection error.", "danger", "Connection Error");
+      }
     });
   }
 }
@@ -312,7 +332,7 @@ function openEditModal(id) {
 
   document.getElementById('modalTitle').textContent = 'Modify Category Limit';
   document.getElementById('budgetId').value = item.id;
-  document.getElementById('budgetCategory').value = item.category;
+  document.getElementById('budgetCategory').value = item.category_id;
   document.getElementById('budgetLimit').value = item.limit;
 
   const modal = document.getElementById('budgetModal');
@@ -321,13 +341,19 @@ function openEditModal(id) {
   }
 }
 
-function deleteBudget(id) {
+async function deleteBudget(id) {
   if (confirm("Are you sure you want to remove this budget limit configuration?")) {
-    const item = budgetsList.find(x => x.id === id);
-    const catName = item ? item.category : '';
-    budgetsList = budgetsList.filter(x => x.id !== id);
-    saveBudgetData();
-    renderBudgetsPage();
-    showToast(`Budget limit configuration for "${catName}" removed.`, "warning", "Limit Removed");
+    try {
+      const response = await fetchApi(`/api/budgets/${id}`, { method: 'DELETE' });
+      if (response && response.ok) {
+        showToast("Budget limit configuration removed.", "warning", "Limit Removed");
+        loadBudgetData();
+      } else {
+        showToast("Failed to delete budget limit.", "danger", "API Error");
+      }
+    } catch (err) {
+      console.error("Budget deletion failed:", err);
+      showToast("Server connection error.", "danger", "Connection Error");
+    }
   }
 }

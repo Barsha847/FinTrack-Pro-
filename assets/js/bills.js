@@ -1,12 +1,8 @@
 /**
- * FinTrack Pro - Bills Controller (Phase 2)
+ * FinTrack Pro - Bills Controller (Phase 6)
  */
 
-import { showToast } from './utils.js';
-
-// LocalStorage Namespaces
-const BILLS_STORAGE_KEY = 'fintrack_bills_v1';
-const TX_STORAGE_KEY = 'fintrack_transactions_v1';
+import { showToast, fetchApi, escapeHTML } from './utils.js';
 
 let billsList = [];
 let currentPage = 1;
@@ -21,24 +17,37 @@ export function initBillsPage() {
 
   loadBillsData();
   setupEventListeners();
-  renderBillsPage();
 }
 
-function loadBillsData() {
-  const data = localStorage.getItem(BILLS_STORAGE_KEY);
-  if (data) {
-    try { billsList = JSON.parse(data); } catch (e) { billsList = []; }
-  } else {
-    billsList = [
-      { id: 1, name: 'AWS Cloud Hosting Charge', amount: 1850.00, category: 'bills', status: 'pending', date: '2026-07-05' },
-      { id: 2, name: 'Apartment Monthly Rent', amount: 15000.00, category: 'rent', status: 'overdue', date: '2026-07-01' }
-    ];
-    localStorage.setItem(BILLS_STORAGE_KEY, JSON.stringify(billsList));
+async function loadBillsData() {
+  try {
+    let url = '/api/bills';
+    const response = await fetchApi(url);
+    if (!response) return;
+
+    const result = await response.json();
+    if (result && result.success) {
+      billsList = (result.data.bills || []).map(bill => ({
+        id: bill.id,
+        name: bill.bill_name,
+        amount: parseFloat(bill.amount || 0),
+        category: bill.category || 'others',
+        date: bill.due_date,
+        status: bill.status,
+        remind_before_days: parseInt(bill.remind_before_days || 3),
+        is_recurring: !!bill.is_recurring,
+        recurring_frequency: bill.recurring_frequency || 'monthly'
+      }));
+      renderBillsPage();
+    } else {
+      billsList = [];
+      showToast(result?.message || "Failed to load bill reminders.", "danger", "API Error");
+      renderBillsPage();
+    }
+  } catch (err) {
+    console.error("Failed to load bills data:", err);
+    showToast("Error connecting to database to load bills.", "danger", "Connection Error");
   }
-}
-
-function saveBillsData() {
-  localStorage.setItem(BILLS_STORAGE_KEY, JSON.stringify(billsList));
 }
 
 function renderBillsPage() {
@@ -133,26 +142,31 @@ function renderTable() {
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid var(--border-color)';
 
-    // Status colors
+    // Status classes
     let statusClass = 'badge-primary';
     if (item.status === 'paid') statusClass = 'badge-success';
     if (item.status === 'overdue') statusClass = 'badge-danger';
 
-    // Mark paid button state
     const isPaid = item.status === 'paid';
     const payBtnHtml = isPaid 
       ? `<button class="btn btn-secondary btn-sm" disabled style="padding: 0.25rem 0.5rem; height: auto; opacity: 0.5;"><i data-lucide="check" style="width: 12px; height: 12px; color: var(--color-success);"></i></button>`
       : `<button class="btn btn-primary btn-sm pay-bill-btn" data-id="${item.id}" style="padding: 0.25rem 0.5rem; height: auto; font-size: 10px;">Pay Now</button>`;
 
+    // Recurrence pill info
+    const recurrenceHtml = item.is_recurring 
+      ? `<span class="badge badge-warning" style="text-transform: capitalize; font-size: 9px;">${item.recurring_frequency}</span>`
+      : `<span class="badge badge-secondary" style="font-size: 9px; opacity: 0.6;">One-Time</span>`;
+
     tr.innerHTML = `
       <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary);">${escapeHTML(item.name)}</td>
-      <td style="padding: 1rem 1.25rem; text-transform: capitalize;"><span class="badge badge-primary">${item.category}</span></td>
+      <td style="padding: 1rem 1.25rem; text-transform: capitalize;"><span class="badge badge-primary">${escapeHTML(item.category)}</span></td>
       <td style="padding: 1rem 1.25rem; font-weight: 600; text-align: right; color: var(--color-danger);">₹${item.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-      <td style="padding: 1rem 1.25rem; color: var(--text-secondary);">${item.date}</td>
-      <td style="padding: 1rem 1.25rem; text-align: center;"><span class="badge ${statusClass}">${item.status}</span></td>
-      <td style="padding: 1rem 1.25rem; text-align: center;">${payBtnHtml}</td>
+      <td style="padding: 1rem 1.25rem; font-weight: 500; color: var(--text-secondary);">${item.date}</td>
+      <td style="padding: 1rem 1.25rem; text-align: center;">${recurrenceHtml}</td>
+      <td style="padding: 1rem 1.25rem; text-align: center;"><span class="badge ${statusClass}" style="text-transform: capitalize;">${item.status}</span></td>
       <td style="padding: 1rem 1.25rem; text-align: center;">
         <div class="d-flex gap-2 justify-center">
+          ${payBtnHtml}
           <button class="btn btn-secondary btn-sm edit-bill-btn" data-id="${item.id}" style="padding: 0.25rem 0.5rem; height: auto;">
             <i data-lucide="edit-2" style="width: 12px; height: 12px;"></i>
           </button>
@@ -166,11 +180,11 @@ function renderTable() {
     tbody.appendChild(tr);
   });
 
-  // Bind Actions Buttons
+  // Action listeners
   tbody.querySelectorAll('.pay-bill-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       payBill(id);
     });
   });
@@ -178,7 +192,7 @@ function renderTable() {
   tbody.querySelectorAll('.edit-bill-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       openEditModal(id);
     });
   });
@@ -186,7 +200,7 @@ function renderTable() {
   tbody.querySelectorAll('.delete-bill-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       deleteBill(id);
     });
   });
@@ -194,63 +208,43 @@ function renderTable() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-function payBill(id) {
-  const item = billsList.find(x => x.id === id);
-  if (!item || item.status === 'paid') return;
-
-  // 1. Update bill status
-  item.status = 'paid';
-  saveBillsData();
-
-  // 2. Log automated expense transaction in `fintrack_transactions_v1`
-  let allTx = [];
-  const rawTx = localStorage.getItem(TX_STORAGE_KEY);
-  if (rawTx) {
-    try { allTx = JSON.parse(rawTx); } catch (e) { allTx = []; }
-  }
-  
-  const autoExpense = {
-    id: Date.now(),
-    title: `Bill Paid: ${item.name}`,
-    amount: item.amount,
-    type: 'expense',
-    date: new Date().toISOString().split('T')[0],
-    category: item.category
-  };
-
-  allTx.unshift(autoExpense);
-  localStorage.setItem(TX_STORAGE_KEY, JSON.stringify(allTx));
-
-  // 3. Render page and trigger toast
-  renderBillsPage();
-  showToast(`Bill "${item.name}" marked as Paid. Auto expense logged.`, "success", "Invoice Settled");
-}
-
 function setupEventListeners() {
-  const searchInput = document.getElementById('dashboardSearchInput');
   const openModalBtn = document.getElementById('openAddBillModalBtn');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const cancelModalBtn = document.getElementById('cancelModalBtn');
   const modal = document.getElementById('billModal');
   const form = document.getElementById('billForm');
+  const searchInput = document.getElementById('dashboardSearchInput');
   const refreshBtn = document.getElementById('pageRefreshBtn');
 
   const prevBtn = document.getElementById('prevPageBtn');
   const nextBtn = document.getElementById('nextPageBtn');
 
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      searchQuery = searchInput.value;
-      currentPage = 1;
-      renderTable();
+  const recurringCheckbox = document.getElementById('billRecurring');
+  const frequencyGroup = document.getElementById('billFrequencyGroup');
+
+  if (recurringCheckbox && frequencyGroup) {
+    recurringCheckbox.addEventListener('change', () => {
+      frequencyGroup.style.display = recurringCheckbox.checked ? 'block' : 'none';
     });
   }
 
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
       loadBillsData();
-      renderBillsPage();
-      showToast("Subscription bill logs synced.", "success", "Synced Invoices");
+      showToast("Bill deadlines and alert logs synchronized.", "success", "Synced Deadlines");
+    });
+  }
+
+  if (searchInput) {
+    let timeout = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        searchQuery = searchInput.value;
+        currentPage = 1;
+        renderTable();
+      }, 350);
     });
   }
 
@@ -274,6 +268,7 @@ function setupEventListeners() {
       document.getElementById('modalTitle').textContent = 'Log Bill Reminder';
       form.reset();
       document.getElementById('billId').value = '';
+      if (frequencyGroup) frequencyGroup.style.display = 'none';
       modal.classList.add('show');
       setTimeout(() => document.getElementById('billName').focus(), 100);
     });
@@ -290,7 +285,7 @@ function setupEventListeners() {
   }
 
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const id = document.getElementById('billId').value;
@@ -299,34 +294,55 @@ function setupEventListeners() {
       const category = document.getElementById('billCategory').value;
       const date = document.getElementById('billDate').value;
       const status = document.getElementById('billStatus').value;
+      
+      const isRecurring = recurringCheckbox ? recurringCheckbox.checked : false;
+      const recurringFrequency = isRecurring ? document.getElementById('billFrequency').value : null;
+      const leadDays = parseInt(document.getElementById('billLeadDays').value || 3);
 
       if (!name || isNaN(amount) || amount <= 0 || !date) {
-        showToast("Please input valid metrics.", "danger", "Validation Error");
+        showToast("Please enter valid billing details.", "danger", "Validation Error");
         return;
       }
 
-      if (id) {
-        const index = billsList.findIndex(x => x.id === parseInt(id));
-        if (index !== -1) {
-          billsList[index] = { ...billsList[index], name, amount, category, date, status };
-          showToast(`Reminder details updated for "${name}".`, "success", "Invoice Updated");
-        }
-      } else {
-        const newBill = {
-          id: Date.now(),
-          name,
-          amount,
-          category,
-          date,
-          status
-        };
-        billsList.push(newBill);
-        showToast(`Bill reminder configured for "${name}".`, "success", "Invoice Logged");
-      }
+      const payload = {
+        bill_name: name,
+        amount: amount,
+        category: category,
+        due_date: date,
+        status: status,
+        is_recurring: isRecurring,
+        recurring_frequency: recurringFrequency,
+        remind_before_days: leadDays
+      };
 
-      saveBillsData();
-      renderBillsPage();
-      closeModal();
+      try {
+        let response;
+        if (id) {
+          response = await fetchApi(`/api/bills/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await fetchApi('/api/bills', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (response && response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            showToast(id ? "Bill details updated successfully." : "Bill reminder configured successfully.", "success", "Success");
+            loadBillsData();
+            closeModal();
+          } else {
+            showToast(result.message || "Failed to configure reminder.", "danger", "API Error");
+          }
+        }
+      } catch (err) {
+        console.error("Bill submit error:", err);
+        showToast("Server connection error.", "danger", "Connection Error");
+      }
     });
   }
 }
@@ -342,6 +358,24 @@ function openEditModal(id) {
   document.getElementById('billCategory').value = item.category;
   document.getElementById('billDate').value = item.date;
   document.getElementById('billStatus').value = item.status;
+  
+  const recurringCheckbox = document.getElementById('billRecurring');
+  const frequencySelect = document.getElementById('billFrequency');
+  const frequencyGroup = document.getElementById('billFrequencyGroup');
+  const leadDaysInput = document.getElementById('billLeadDays');
+
+  if (recurringCheckbox) {
+    recurringCheckbox.checked = item.is_recurring;
+  }
+  if (frequencySelect) {
+    frequencySelect.value = item.recurring_frequency;
+  }
+  if (frequencyGroup) {
+    frequencyGroup.style.display = item.is_recurring ? 'block' : 'none';
+  }
+  if (leadDaysInput) {
+    leadDaysInput.value = item.remind_before_days;
+  }
 
   const modal = document.getElementById('billModal');
   if (modal) {
@@ -350,25 +384,37 @@ function openEditModal(id) {
   }
 }
 
-function deleteBill(id) {
-  if (confirm("Are you sure you want to remove this bill reminder?")) {
-    const item = billsList.find(x => x.id === id);
-    const name = item ? item.name : '';
-    billsList = billsList.filter(x => x.id !== id);
-    saveBillsData();
-    renderBillsPage();
-    showToast(`Bill reminder for "${name}" deleted.`, "warning", "Invoice Removed");
+async function payBill(id) {
+  try {
+    const response = await fetchApi(`/api/bills/${id}/paid`, { method: 'PUT' });
+    if (response && response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        showToast("Bill recorded as paid.", "success", "Payment Captured");
+        loadBillsData();
+      } else {
+        showToast(result.message || "Mark paid failed.", "danger", "API Error");
+      }
+    }
+  } catch (err) {
+    console.error("Failed to pay bill:", err);
+    showToast("Server connection error during payment.", "danger", "Connection Error");
   }
 }
 
-function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, 
-    tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag] || tag)
-  );
+async function deleteBill(id) {
+  if (confirm("Are you sure you want to remove this bill reminder?")) {
+    try {
+      const response = await fetchApi(`/api/bills/${id}`, { method: 'DELETE' });
+      if (response && response.ok) {
+        showToast("Bill reminder removed.", "warning", "Invoice Removed");
+        loadBillsData();
+      } else {
+        showToast("Failed to delete bill reminder.", "danger", "API Error");
+      }
+    } catch (err) {
+      console.error("Bill deletion failed:", err);
+      showToast("Server connection error.", "danger", "Connection Error");
+    }
+  }
 }

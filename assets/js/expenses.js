@@ -1,75 +1,93 @@
 /**
- * FinTrack Pro - Expenses Tracking Controller (Phase 2)
+ * FinTrack Pro - Expenses Controller (Phase 6)
  */
 
-import { showToast } from './utils.js';
-
-// LocalStorage Namespaces
-const TX_STORAGE_KEY = 'fintrack_transactions_v1';
-const BUDGET_STORAGE_KEY = 'fintrack_budgets_v1';
+import { showToast, fetchApi, escapeHTML } from './utils.js';
 
 let expensesList = [];
-let budgetsList = [];
+let categoriesList = [];
 let currentPage = 1;
 const itemsPerPage = 8;
 let searchQuery = '';
-let selectedCategory = 'all';
+let categoryFilterVal = 'all';
 
 export function initExpensesPage() {
   const isExpensesPage = document.querySelector('.expenses-page-layout');
   if (!isExpensesPage) return;
 
-  console.warn("Initializing Expenses Tracking Module...");
+  console.warn("Initializing Expenses Module...");
 
   loadExpensesData();
   setupEventListeners();
-  renderExpensesPage();
 }
 
-function loadExpensesData() {
-  const data = localStorage.getItem(TX_STORAGE_KEY);
-  if (data) {
-    try {
-      const allTx = JSON.parse(data);
-      expensesList = allTx.filter(tx => tx.type === 'expense');
-    } catch (e) {
-      console.error(e);
+async function loadExpensesData() {
+  try {
+    // 1. Fetch categories for selects
+    const catResponse = await fetchApi('/api/categories?type=expense');
+    if (catResponse && catResponse.ok) {
+      const catRes = await catResponse.json();
+      categoriesList = catRes.data.categories || [];
+      populateCategoryDropdowns();
+    }
+
+    // 2. Fetch expenses
+    let url = `/api/expenses?category=${encodeURIComponent(categoryFilterVal)}`;
+    if (searchQuery.trim() !== '') {
+      url += `&search=${encodeURIComponent(searchQuery.trim())}`;
+    }
+
+    const response = await fetchApi(url);
+    if (!response) return;
+
+    const result = await response.json();
+    if (result && result.success) {
+      expensesList = (result.data.expenses || []).map(exp => ({
+        id: exp.id,
+        title: exp.description || exp.merchant || 'Expense Transaction',
+        amount: parseFloat(exp.amount),
+        category: exp.category_name || 'others',
+        category_id: exp.category_id,
+        date: exp.expense_date
+      }));
+      renderExpensesPage();
+    } else {
       expensesList = [];
+      showToast(result?.message || "Failed to load expenses.", "danger", "API Error");
+      renderExpensesPage();
     }
-  } else {
-    expensesList = [
-      { id: 2, title: 'Whole Foods Outflow', amount: 4520.00, type: 'expense', date: '2026-06-27', category: 'food' },
-      { id: 3, title: 'AWS Cloud Hosting Invoice', amount: 1850.00, type: 'expense', date: '2026-06-26', category: 'bills' }
-    ];
-  }
-
-  // Load budgets for alerts comparison
-  const budgetData = localStorage.getItem(BUDGET_STORAGE_KEY);
-  if (budgetData) {
-    try { budgetsList = JSON.parse(budgetData); } catch (e) { budgetsList = []; }
-  } else {
-    budgetsList = [
-      { id: 1, category: 'food', limit: 12000.00 },
-      { id: 2, category: 'bills', limit: 8000.00 }
-    ];
+  } catch (err) {
+    console.error("Failed to load expenses list:", err);
+    showToast("Error connecting to server to load expenses.", "danger", "API Connection Error");
   }
 }
 
-function saveExpensesData() {
-  let allTx = [];
-  const rawAll = localStorage.getItem(TX_STORAGE_KEY);
-  if (rawAll) {
-    try {
-      const existingTx = JSON.parse(rawAll);
-      const incomes = existingTx.filter(tx => tx.type !== 'expense');
-      allTx = [...expensesList, ...incomes];
-    } catch (e) {
-      allTx = [...expensesList];
-    }
-  } else {
-    allTx = [...expensesList];
+function populateCategoryDropdowns() {
+  const filterSelect = document.getElementById('categoryFilter');
+  const inputSelect = document.getElementById('txCategory');
+
+  // Fill modal input select
+  if (inputSelect) {
+    inputSelect.innerHTML = '';
+    categoriesList.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.id;
+      opt.textContent = cat.name;
+      inputSelect.appendChild(opt);
+    });
   }
-  localStorage.setItem(TX_STORAGE_KEY, JSON.stringify(allTx));
+
+  // Fill filter dropdown (preserve 'all' as the default first option)
+  if (filterSelect && filterSelect.options.length <= 1) {
+    filterSelect.innerHTML = '<option value="all">All Categories</option>';
+    categoriesList.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat.id;
+      opt.textContent = cat.name;
+      filterSelect.appendChild(opt);
+    });
+    filterSelect.value = categoryFilterVal;
+  }
 }
 
 function renderExpensesPage() {
@@ -78,51 +96,31 @@ function renderExpensesPage() {
 }
 
 function renderMetrics() {
+  const countEl = document.getElementById('activeExpensesVal');
   const totalEl = document.getElementById('totalExpensesVal');
-  const highCatEl = document.getElementById('highCatVal');
-  const avgEl = document.getElementById('avgExpensesVal');
-  const alertsEl = document.getElementById('budgetAlertsVal');
+  const monthEl = document.getElementById('monthlySpentVal');
+  const avgEl = document.getElementById('averageDailyVal');
 
-  let total = 0;
-  const categorySums = {};
+  let totalSum = 0;
+  let monthSum = 0;
+  
+  const now = new Date();
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
   expensesList.forEach(item => {
-    total += item.amount;
-    categorySums[item.category] = (categorySums[item.category] || 0) + item.amount;
-  });
-
-  // Calculate Peak Spending Category
-  let peakCategory = 'None';
-  let maxAmount = 0;
-  for (const cat in categorySums) {
-    if (categorySums[cat] > maxAmount) {
-      maxAmount = categorySums[cat];
-      peakCategory = cat.charAt(0).toUpperCase() + cat.slice(1);
-    }
-  }
-
-  const avg = expensesList.length > 0 ? (total / expensesList.length) : 0;
-
-  // Calculate Budget Warnings (utilization > 70%)
-  let activeAlerts = 0;
-  budgetsList.forEach(budget => {
-    const spent = categorySums[budget.category] || 0;
-    if (spent > budget.limit * 0.7) {
-      activeAlerts++;
+    totalSum += item.amount;
+    if (item.date && item.date.startsWith(currentMonthStr)) {
+      monthSum += item.amount;
     }
   });
 
-  if (totalEl) totalEl.textContent = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-  if (highCatEl) highCatEl.textContent = maxAmount > 0 ? `${peakCategory} (₹${maxAmount.toLocaleString('en-IN')})` : 'None';
-  if (avgEl) avgEl.textContent = '₹' + avg.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-  if (alertsEl) {
-    alertsEl.textContent = activeAlerts > 0 ? `${activeAlerts} Warning${activeAlerts > 1 ? 's' : ''}` : '0 Warnings';
-    if (activeAlerts > 0) {
-      alertsEl.className = 'stats-value text-danger';
-    } else {
-      alertsEl.className = 'stats-value';
-    }
-  }
+  const activeCount = expensesList.length;
+  const avgDaily = activeCount > 0 ? (totalSum / 30) : 0; // Simple rolling estimate
+
+  if (countEl) countEl.textContent = `${activeCount} Transaction${activeCount !== 1 ? 's' : ''}`;
+  if (totalEl) totalEl.textContent = '₹' + totalSum.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+  if (monthEl) monthEl.textContent = '₹' + monthSum.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+  if (avgEl) avgEl.textContent = '₹' + avgDaily.toLocaleString('en-IN', { minimumFractionDigits: 2 });
 }
 
 function renderTable() {
@@ -131,22 +129,13 @@ function renderTable() {
 
   tbody.innerHTML = '';
 
-  let filtered = expensesList.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCat = selectedCategory === 'all' || item.category === selectedCategory;
-    return matchesSearch && matchesCat;
-  });
-
-  filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  const totalItems = filtered.length;
+  const totalItems = expensesList.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
   if (currentPage > totalPages) currentPage = totalPages;
 
   const startIdx = (currentPage - 1) * itemsPerPage;
   const endIdx = Math.min(startIdx + itemsPerPage, totalItems);
-  const paginated = filtered.slice(startIdx, endIdx);
+  const paginated = expensesList.slice(startIdx, endIdx);
 
   const prevBtn = document.getElementById('prevPageBtn');
   const nextBtn = document.getElementById('nextPageBtn');
@@ -166,10 +155,10 @@ function renderTable() {
         <td colspan="5" style="padding: 3rem; text-align: center;">
           <div class="empty-state-container">
             <svg class="empty-state-svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h.007m-.007 3h.007m-.007 3h.007m-1.5-6h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6h1.5m-1.5 3h1.5m-1.5 3h1.5M9 4.5h1.5m-1.5 3h1.5m-1.5 3h1.5M12 4.5h1.5m-1.5 3h1.5m-1.5 3h1.5M15 4.5h1.5m-1.5 3h1.5m-1.5 3h1.5M18 4.5h1.5m-1.5 3h1.5m-1.5 3h1.5" />
             </svg>
-            <div class="empty-state-title">No matching expenses found</div>
-            <div class="empty-state-desc">Try modifying your filter categories or log a new expenditure invoice.</div>
+            <div class="empty-state-title">No transactions logged</div>
+            <div class="empty-state-desc">Capture your daily expenses here to feed budget limits and statistics.</div>
           </div>
         </td>
       </tr>
@@ -183,15 +172,17 @@ function renderTable() {
     tr.style.transition = 'background-color var(--motion-hover)';
     
     let badgeClass = 'badge-primary';
-    if (item.category === 'food') badgeClass = 'badge-success';
-    if (item.category === 'bills') badgeClass = 'badge-danger';
+    const lowerCat = item.category.toLowerCase();
+    if (lowerCat === 'food' || lowerCat === 'groceries') badgeClass = 'badge-success';
+    if (lowerCat === 'bills' || lowerCat === 'utilities') badgeClass = 'badge-danger';
+    if (lowerCat === 'rent' || lowerCat === 'housing') badgeClass = 'badge-warning';
 
     tr.innerHTML = `
       <td style="padding: 1rem 1.25rem; font-weight: 500; color: var(--text-secondary);">${item.date}</td>
       <td style="padding: 1rem 1.25rem; font-weight: 700; color: var(--text-primary);">${escapeHTML(item.title)}</td>
       <td style="padding: 1rem 1.25rem;">
-        <span class="badge ${badgeClass}">
-          ${item.category}
+        <span class="badge ${badgeClass}" style="text-transform: capitalize;">
+          ${escapeHTML(item.category)}
         </span>
       </td>
       <td style="padding: 1rem 1.25rem; font-weight: 700; text-align: right; color: var(--color-danger);">
@@ -215,7 +206,7 @@ function renderTable() {
   tbody.querySelectorAll('.edit-tx-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       openEditModal(id);
     });
   });
@@ -223,7 +214,7 @@ function renderTable() {
   tbody.querySelectorAll('.delete-tx-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = parseInt(btn.getAttribute('data-id'));
+      const id = btn.getAttribute('data-id');
       deleteExpense(id);
     });
   });
@@ -232,8 +223,6 @@ function renderTable() {
 }
 
 function setupEventListeners() {
-  const searchInput = document.getElementById('dashboardSearchInput');
-  const catFilter = document.getElementById('categoryFilter');
   const openModalBtn = document.getElementById('openAddExpenseModalBtn');
   const closeModalBtn = document.getElementById('closeModalBtn');
   const cancelModalBtn = document.getElementById('cancelModalBtn');
@@ -243,37 +232,33 @@ function setupEventListeners() {
 
   const prevBtn = document.getElementById('prevPageBtn');
   const nextBtn = document.getElementById('nextPageBtn');
-
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      searchQuery = searchInput.value;
-      currentPage = 1;
-      renderTable();
-    });
-  }
-
-  if (catFilter) {
-    catFilter.addEventListener('change', () => {
-      selectedCategory = catFilter.value;
-      currentPage = 1;
-      renderTable();
-    });
-  }
+  const searchInput = document.getElementById('searchInput');
+  const filterSelect = document.getElementById('categoryFilter');
 
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
-      const tbody = document.getElementById('tableBodyContainer');
-      if (tbody) {
-        tbody.innerHTML = `
-          <tr class="skeleton" style="height: 50px;"><td colspan="5"></td></tr>
-          <tr class="skeleton" style="height: 50px;"><td colspan="5"></td></tr>
-        `;
-      }
-      setTimeout(() => {
+      loadExpensesData();
+      showToast("Expenses listing refreshed and synced.", "success", "Refreshed Ledger");
+    });
+  }
+
+  if (filterSelect) {
+    filterSelect.addEventListener('change', () => {
+      categoryFilterVal = filterSelect.value;
+      currentPage = 1;
+      loadExpensesData();
+    });
+  }
+
+  if (searchInput) {
+    let timeout = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        searchQuery = searchInput.value;
+        currentPage = 1;
         loadExpensesData();
-        renderExpensesPage();
-        showToast("Expenses ledger records synced.", "success", "Database Refreshed");
-      }, 1000);
+      }, 350);
     });
   }
 
@@ -297,6 +282,10 @@ function setupEventListeners() {
       document.getElementById('modalTitle').textContent = 'Add Expense Transaction';
       form.reset();
       document.getElementById('txId').value = '';
+      
+      // Default to today's date
+      document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+      
       modal.classList.add('show');
       setTimeout(() => document.getElementById('txTitle').focus(), 100);
     });
@@ -313,42 +302,61 @@ function setupEventListeners() {
   }
 
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       
       const id = document.getElementById('txId').value;
       const title = document.getElementById('txTitle').value.trim();
       const amount = parseFloat(document.getElementById('txAmount').value);
-      const category = document.getElementById('txCategory').value;
+      const categoryId = document.getElementById('txCategory').value;
       const date = document.getElementById('txDate').value;
 
       if (!title || isNaN(amount) || amount <= 0) {
-        showToast("Please input valid metrics.", "danger", "Validation Failed");
+        showToast("Please enter a valid amount and description title.", "danger", "Validation Failed");
         return;
       }
 
-      if (id) {
-        const index = expensesList.findIndex(x => x.id === parseInt(id));
-        if (index !== -1) {
-          expensesList[index] = { ...expensesList[index], title, amount, category, date };
-          showToast(`Expense "${title}" updated successfully.`, "success", "Transaction Updated");
-        }
-      } else {
-        const newTx = {
-          id: Date.now(),
-          title,
-          amount,
-          type: 'expense',
-          category,
-          date
-        };
-        expensesList.unshift(newTx);
-        showToast(`Expense "${title}" logged successfully.`, "success", "Transaction Logged");
+      if (!categoryId) {
+        showToast("Configure active categories first.", "danger", "Configuration Error");
+        return;
       }
 
-      saveExpensesData();
-      renderExpensesPage();
-      closeModal();
+      const payload = {
+        description: title,
+        amount: amount,
+        category_id: categoryId,
+        expense_date: date,
+        merchant: title // Replicate title to merchant column for completeness
+      };
+
+      try {
+        let response;
+        if (id) {
+          response = await fetchApi(`/api/expenses/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await fetchApi('/api/expenses', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+
+        if (response && response.ok) {
+          const result = await response.json();
+          if (result.success) {
+            showToast(id ? `Expense "${title}" updated successfully.` : `Expense "${title}" logged successfully.`, "success", "Success");
+            loadExpensesData();
+            closeModal();
+          } else {
+            showToast(result.message || "Failed to log expense.", "danger", "API Error");
+          }
+        }
+      } catch (err) {
+        console.error("Expense submit error:", err);
+        showToast("Server connection error.", "danger", "Connection Error");
+      }
     });
   }
 }
@@ -361,7 +369,7 @@ function openEditModal(id) {
   document.getElementById('txId').value = item.id;
   document.getElementById('txTitle').value = item.title;
   document.getElementById('txAmount').value = item.amount;
-  document.getElementById('txCategory').value = item.category;
+  document.getElementById('txCategory').value = item.category_id;
   document.getElementById('txDate').value = item.date;
 
   const modal = document.getElementById('expenseModal');
@@ -371,25 +379,19 @@ function openEditModal(id) {
   }
 }
 
-function deleteExpense(id) {
+async function deleteExpense(id) {
   if (confirm("Are you sure you want to delete this expense entry?")) {
-    const item = expensesList.find(x => x.id === id);
-    const title = item ? item.title : '';
-    expensesList = expensesList.filter(x => x.id !== id);
-    saveExpensesData();
-    renderExpensesPage();
-    showToast(`Expense "${title}" deleted successfully.`, "warning", "Transaction Removed");
+    try {
+      const response = await fetchApi(`/api/expenses/${id}`, { method: 'DELETE' });
+      if (response && response.ok) {
+        showToast("Expense entry deleted.", "warning", "Transaction Removed");
+        loadExpensesData();
+      } else {
+        showToast("Failed to delete expense entry.", "danger", "API Error");
+      }
+    } catch (err) {
+      console.error("Expense deletion failed:", err);
+      showToast("Server connection error.", "danger", "Connection Error");
+    }
   }
-}
-
-function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, 
-    tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag] || tag)
-  );
 }
