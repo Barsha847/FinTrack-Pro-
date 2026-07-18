@@ -16,6 +16,8 @@ use App\Controllers\ExpenseController;
 use App\Controllers\BudgetController;
 use App\Controllers\BillReminderController;
 use App\Controllers\NotificationController;
+use App\Controllers\IncomeController;
+use App\Controllers\ReportController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\CsrfMiddleware;
 
@@ -46,6 +48,17 @@ $router->post('/api/expenses', [ExpenseController::class, 'store'], [AuthMiddlew
 $router->get('/api/expenses/{id}', [ExpenseController::class, 'show'], [AuthMiddleware::class]);
 $router->put('/api/expenses/{id}', [ExpenseController::class, 'update'], [AuthMiddleware::class]);
 $router->delete('/api/expenses/{id}', [ExpenseController::class, 'destroy'], [AuthMiddleware::class]);
+
+// Income Endpoints
+$router->get('/api/income', [IncomeController::class, 'index'], [AuthMiddleware::class]);
+$router->post('/api/income', [IncomeController::class, 'store'], [AuthMiddleware::class]);
+$router->get('/api/income/{id}', [IncomeController::class, 'show'], [AuthMiddleware::class]);
+$router->put('/api/income/{id}', [IncomeController::class, 'update'], [AuthMiddleware::class]);
+$router->delete('/api/income/{id}', [IncomeController::class, 'destroy'], [AuthMiddleware::class]);
+
+// Report / Analytics Endpoints
+$router->get('/api/reports/summary', [ReportController::class, 'summary'], [AuthMiddleware::class]);
+$router->get('/api/reports/details', [ReportController::class, 'details'], [AuthMiddleware::class]);
 
 // Budget Endpoints
 $router->get('/api/budgets', [BudgetController::class, 'index'], [AuthMiddleware::class]);

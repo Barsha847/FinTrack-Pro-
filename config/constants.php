@@ -60,5 +60,9 @@ return [
         'message' => 'message',
         'data'    => 'data',
         'errors'  => 'errors',
+    ],
+
+    'analytics' => [
+        'baseline_balance' => 420180.00,
     ]
 ];
