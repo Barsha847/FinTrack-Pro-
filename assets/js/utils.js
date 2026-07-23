@@ -377,6 +377,18 @@ export function setupLogout() {
 /**
  * Fetch wrapper that automatically injects CSRF tokens and handles 401 redirects
  */
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function subscribeTokenRefresh(cb) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed() {
+  refreshSubscribers.map(cb => cb());
+  refreshSubscribers = [];
+}
+
 export async function fetchApi(url, options = {}) {
   options.headers = options.headers || {};
   
@@ -403,13 +415,86 @@ export async function fetchApi(url, options = {}) {
   try {
     const response = await fetch(targetUrl, options);
     
-    if (response.status === 401 && !url.includes('/api/auth/me') && !url.includes('/api/auth/login')) {
-      sessionStorage.clear();
-      const loginPath = getRoutePath('login');
-      if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('/login')) {
-        window.location.href = loginPath;
+    if (response.status === 401) {
+      // Don't refresh on login or refresh itself
+      if (url.includes('/api/auth/login') || url.includes('/api/auth/refresh')) {
+        return response;
       }
-      return null;
+
+      // If it is /api/auth/me, we only refresh if we are not on the login/signup page.
+      const path = window.location.pathname;
+      if (url.includes('/api/auth/me') && (path.includes('login.html') || path.includes('signup.html'))) {
+        return response;
+      }
+
+      if (!isRefreshing) {
+        isRefreshing = true;
+        try {
+          const refreshUrl = window.location.port !== '8000' ? 'http://localhost:8000/api/auth/refresh' : '/api/auth/refresh';
+          const refreshResponse = await fetch(refreshUrl, {
+            method: 'POST',
+            credentials: 'include'
+          });
+          
+          if (refreshResponse.ok) {
+            const refreshResult = await refreshResponse.json();
+            if (refreshResult.success) {
+              // Update CSRF token if backend returned it
+              if (refreshResult.data && refreshResult.data.csrf_token) {
+                sessionStorage.setItem('csrf_token', refreshResult.data.csrf_token);
+              }
+              isRefreshing = false;
+              onRefreshed();
+            } else {
+              throw new Error("Refresh token invalid");
+            }
+          } else {
+            throw new Error("Refresh request failed");
+          }
+        } catch (refreshErr) {
+          isRefreshing = false;
+          // Refresh failed - force logout
+          sessionStorage.clear();
+          localStorage.clear();
+          
+          const path = window.location.pathname;
+          const unprotectedKeywords = [
+            'login.html',
+            'signup.html',
+            'otp.html',
+            'verify-email.html',
+            'forgot-password.html',
+            'reset-password.html',
+            'maintenance.html',
+            '404.html',
+            '500.html'
+          ];
+          const isLanding = !path.includes('/pages/') && (path.endsWith('/') || path.endsWith('index.html') || path.endsWith('FinTrack%20Pro/') || path.endsWith('FinTrack-Pro-/'));
+          const isUnprotected = isLanding || unprotectedKeywords.some(keyword => path.includes(keyword));
+
+          if (!isUnprotected) {
+            const loginPath = getRoutePath('login');
+            if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('/login')) {
+              window.location.href = loginPath;
+            }
+          }
+          return null;
+        }
+      }
+
+      // Queue the request until refresh finishes
+      return new Promise((resolve) => {
+        subscribeTokenRefresh(async () => {
+          // Re-fetch with new CSRF token if method was state-changing
+          if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+            const newToken = sessionStorage.getItem('csrf_token');
+            if (newToken) {
+              options.headers['X-CSRF-TOKEN'] = newToken;
+            }
+          }
+          resolve(await fetch(targetUrl, options));
+        });
+      });
     }
     
     return response;
@@ -499,29 +584,32 @@ export async function checkPageAuth() {
   }
   
   try {
-    const response = await fetchApi('/api/auth/session');
+    // Before every page loads: Call: GET /api/auth/me
+    const response = await fetchApi('/api/auth/me');
     if (!response) return; // fetchApi redirects to login on 401
     
     const result = await response.json();
-    if (!result || !result.success || !result.data || !result.data.authenticated) {
+    if (!result || !result.success || !result.data || !result.data.user) {
       sessionStorage.clear();
       localStorage.clear();
       window.location.href = getRoutePath('login');
       return;
     }
-    
-    // Session is valid. If user profile is not in localStorage, fetch from /api/auth/me to sync
-    if (!localStorage.getItem('fintrack_user_name')) {
-      const meResponse = await fetchApi('/api/auth/me');
-      if (meResponse && meResponse.ok) {
-        const meResult = await meResponse.json();
-        if (meResult && meResult.success && meResult.data && meResult.data.user) {
-          const user = meResult.data.user;
-          localStorage.setItem('fintrack_user_name', user.full_name);
-          localStorage.setItem('fintrack_user_email', user.email);
-          syncUserProfile();
-        }
-      }
+
+    const user = result.data.user;
+    localStorage.setItem('fintrack_user_name', user.full_name);
+    localStorage.setItem('fintrack_user_email', user.email);
+    localStorage.setItem('fintrack_role', user.role);
+    syncUserProfile();
+
+    // Client-side Role Guard for admin page protection
+    const currentPage = path.split('/').pop() || '';
+    if (currentPage === 'admin.html' && user.role !== 'admin') {
+      showToast("Access denied. Admin authorization required.", "danger", "Access Forbidden");
+      setTimeout(() => {
+        window.location.href = getRoutePath('dashboard');
+      }, 1500);
+      return;
     }
   } catch (err) {
     console.error("Auth check failure:", err);

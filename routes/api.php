@@ -35,6 +35,7 @@ $router->post('/api/auth/login', [AuthController::class, 'login']);
 $router->post('/api/auth/logout', [AuthController::class, 'logout'], [AuthMiddleware::class]);
 $router->get('/api/auth/me', [AuthController::class, 'me'], [AuthMiddleware::class]);
 $router->get('/api/auth/session', [AuthController::class, 'session']);
+$router->post('/api/auth/refresh', [AuthController::class, 'refresh']);
 $router->get('/api/auth/csrf-token', [AuthController::class, 'csrfToken']);
 $router->post('/api/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 $router->post('/api/auth/reset-password', [AuthController::class, 'resetPassword']);

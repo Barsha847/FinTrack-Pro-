@@ -154,6 +154,9 @@ class AuthController
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
             $result = $this->authService->verifyEmail($email, $otp, $ip, $userAgent);
             
+            // Set secure HttpOnly cookies for JWT access & refresh tokens
+            $this->setAuthCookies($result['data']['accessToken'], $result['data']['refreshToken']);
+            
             ResponseHelper::success($result['message'], $result['data']);
         } catch (Exception $e) {
             $code = $e->getCode();
@@ -211,18 +214,22 @@ class AuthController
             $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
             $result = $this->authService->login($email, $password, $ip, $userAgent);
             
+            // Set secure HttpOnly cookies for JWT access & refresh tokens
+            $this->setAuthCookies($result['data']['accessToken'], $result['data']['refreshToken']);
+            
             ResponseHelper::success($result['message'], $result['data']);
-        } catch (Exception $e) {
-            $code = $e->getCode();
-            $statusCode = ($code >= 400 && $code < 600) ? $code : 500;
-            
-            // Map custom messages to trigger OTP redirections on frontend for unverified login attempts
-            $errors = [];
-            if ($statusCode === 403 && str_contains($e->getMessage(), "verified")) {
-                $errors[] = "email_unverified";
+        } catch (\Throwable $e) {
+            if (!headers_sent()) {
+                header('Content-Type: application/json; charset=utf-8');
+                http_response_code(500);
             }
-            
-            ResponseHelper::error($e->getMessage(), $statusCode, $errors);
+            echo json_encode([
+                "success" => false,
+                "message" => $e->getMessage(),
+                "file" => $e->getFile(),
+                "line" => $e->getLine()
+            ]);
+            exit;
         }
     }
 
@@ -240,11 +247,170 @@ class AuthController
         $ip = IpHelper::getClientIp();
 
         try {
+            // Delete Refresh Token from database
+            $refreshToken = $_COOKIE['refresh_token'] ?? '';
+            if ($refreshToken !== '') {
+                $tokenHash = hash('sha256', $refreshToken);
+                $refreshTokenRepo = new \App\Repositories\RefreshTokenRepository();
+                $refreshTokenRepo->delete($tokenHash);
+            }
+
+            // Clear Cookies
+            $this->clearAuthCookies();
+
+            // Destroy session and clean up audit tracking
             $this->authService->logout($sessionId, $userId, $ip);
             ResponseHelper::success("Sign out successful.");
         } catch (Exception $e) {
             ResponseHelper::error("An error occurred during logout.", 500);
         }
+    }
+
+    /**
+     * POST /api/auth/refresh
+     */
+    public function refresh(): void
+    {
+        $refreshToken = $_COOKIE['refresh_token'] ?? '';
+        if (empty($refreshToken)) {
+            ResponseHelper::error("Refresh token missing.", 401);
+            return;
+        }
+
+        $tokenHash = hash('sha256', $refreshToken);
+        $refreshTokenRepo = new \App\Repositories\RefreshTokenRepository();
+        $tokenRecord = $refreshTokenRepo->findByHash($tokenHash);
+
+        if (!$tokenRecord) {
+            // Unrecognized or expired token
+            $this->clearAuthCookies();
+            ResponseHelper::error("Invalid or expired refresh token.", 401);
+            return;
+        }
+
+        $userId = $tokenRecord['user_id'];
+        $ip = IpHelper::getClientIp();
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+
+        // --- REUSE DETECTION ---
+        if ($tokenRecord['used']) {
+            // Stolen refresh token reuse detected! Immediately revoke all sessions for this user.
+            $refreshTokenRepo->deleteAllForUser($userId);
+            $this->clearAuthCookies();
+
+            // Log high-severity audit log
+            $activityLogRepo = new \App\Repositories\ActivityLogRepository();
+            $activityLogRepo->record(
+                $userId,
+                'Blocked Login',
+                'Authentication',
+                "REFRESH TOKEN REUSE DETECTED! Revoking all sessions for security protection.",
+                ['user_agent' => $userAgent, 'ip' => $ip],
+                $ip
+            );
+
+            ResponseHelper::error("Token reuse detected. All sessions revoked.", 401);
+            return;
+        }
+
+        try {
+            $userRepo = new \App\Repositories\UserRepository();
+            $user = $userRepo->findById($userId);
+
+            if (!$user || $user['account_status'] !== 'active') {
+                $this->clearAuthCookies();
+                ResponseHelper::error("User account not found or not active.", 401);
+                return;
+            }
+
+            // Mark old token as used to implement rotation
+            $refreshTokenRepo->markAsUsed($tokenHash);
+
+            // Generate new Access and Refresh tokens
+            $tokens = $this->authService->generateTokens($user);
+            $newTokenHash = hash('sha256', $tokens['refreshToken']);
+
+            // Save new token in database
+            $refreshTokenRepo->create($userId, $newTokenHash, $ip, $userAgent, 604800); // 7 days
+
+            // Set new cookies
+            $this->setAuthCookies($tokens['accessToken'], $tokens['refreshToken']);
+
+            // Log Token Refreshed audit event
+            $activityLogRepo = new \App\Repositories\ActivityLogRepository();
+            $activityLogRepo->record(
+                $userId,
+                'Refresh Token',
+                'Authentication',
+                "Access token silently refreshed successfully.",
+                ['user_agent' => $userAgent],
+                $ip
+            );
+
+            ResponseHelper::success("Tokens refreshed.", [
+                'accessToken' => $tokens['accessToken'],
+                'refreshToken' => $tokens['refreshToken'],
+                'csrf_token' => $_SESSION['csrf_token'] ?? bin2hex(random_bytes(32))
+            ]);
+        } catch (Exception $e) {
+            ResponseHelper::error("Error refreshing tokens: " . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Set secure HttpOnly cookies for access and refresh tokens.
+     */
+    private function setAuthCookies(string $accessToken, string $refreshToken): void
+    {
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+
+        // Access Token: HTTPOnly, Secure (if HTTPS), SameSite=Lax, expire in 15 mins (900 seconds)
+        setcookie('access_token', $accessToken, [
+            'expires' => time() + 900,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+
+        // Refresh Token: HTTPOnly, Secure (if HTTPS), SameSite=Lax, expire in 7 days (604800 seconds)
+        setcookie('refresh_token', $refreshToken, [
+            'expires' => time() + 604800,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+    }
+
+    /**
+     * Clear auth cookies on logout or failure.
+     */
+    private function clearAuthCookies(): void
+    {
+        $isSecure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || ($_SERVER['SERVER_PORT'] ?? '') === '443';
+
+        setcookie('access_token', '', [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+
+        setcookie('refresh_token', '', [
+            'expires' => time() - 3600,
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isSecure,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
     }
 
     /**

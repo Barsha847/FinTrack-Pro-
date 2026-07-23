@@ -28,6 +28,10 @@ class ComposerStaticInitf6d73b5fd273be056b51b71d3aeb77df
         array (
             'GrahamCampbell\\ResultType\\' => 26,
         ),
+        'F' =>
+        array (
+            'Firebase\\JWT\\' => 13,
+        ),
         'D' =>
         array (
             'Dotenv\\' => 7,
@@ -64,6 +68,10 @@ class ComposerStaticInitf6d73b5fd273be056b51b71d3aeb77df
         array (
             0 => __DIR__ . '/..' . '/graham-campbell/result-type/src',
         ),
+        'Firebase\\JWT\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
+        ),
         'Dotenv\\' =>
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
@@ -80,7 +88,16 @@ class ComposerStaticInitf6d73b5fd273be056b51b71d3aeb77df
 
     public static $classMap = array (
         'App\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Controllers/AuthController.php',
+        'App\\Controllers\\BillReminderController' => __DIR__ . '/../..' . '/app/Controllers/BillReminderController.php',
+        'App\\Controllers\\BudgetController' => __DIR__ . '/../..' . '/app/Controllers/BudgetController.php',
+        'App\\Controllers\\CategoryController' => __DIR__ . '/../..' . '/app/Controllers/CategoryController.php',
+        'App\\Controllers\\ExpenseController' => __DIR__ . '/../..' . '/app/Controllers/ExpenseController.php',
         'App\\Controllers\\HealthController' => __DIR__ . '/../..' . '/app/Controllers/HealthController.php',
+        'App\\Controllers\\IncomeController' => __DIR__ . '/../..' . '/app/Controllers/IncomeController.php',
+        'App\\Controllers\\InvestmentController' => __DIR__ . '/../..' . '/app/Controllers/InvestmentController.php',
+        'App\\Controllers\\LoanController' => __DIR__ . '/../..' . '/app/Controllers/LoanController.php',
+        'App\\Controllers\\NotificationController' => __DIR__ . '/../..' . '/app/Controllers/NotificationController.php',
+        'App\\Controllers\\ReportController' => __DIR__ . '/../..' . '/app/Controllers/ReportController.php',
         'App\\Database\\Database' => __DIR__ . '/../..' . '/app/Database/Database.php',
         'App\\Helpers\\IpHelper' => __DIR__ . '/../..' . '/app/Helpers/IpHelper.php',
         'App\\Helpers\\Logger' => __DIR__ . '/../..' . '/app/Helpers/Logger.php',
@@ -89,14 +106,31 @@ class ComposerStaticInitf6d73b5fd273be056b51b71d3aeb77df
         'App\\Middleware\\AuthMiddleware' => __DIR__ . '/../..' . '/app/Middleware/AuthMiddleware.php',
         'App\\Middleware\\CsrfMiddleware' => __DIR__ . '/../..' . '/app/Middleware/CsrfMiddleware.php',
         'App\\Repositories\\ActivityLogRepository' => __DIR__ . '/../..' . '/app/Repositories/ActivityLogRepository.php',
+        'App\\Repositories\\BillReminderRepository' => __DIR__ . '/../..' . '/app/Repositories/BillReminderRepository.php',
+        'App\\Repositories\\BudgetRepository' => __DIR__ . '/../..' . '/app/Repositories/BudgetRepository.php',
+        'App\\Repositories\\CategoryRepository' => __DIR__ . '/../..' . '/app/Repositories/CategoryRepository.php',
         'App\\Repositories\\EmailVerificationRepository' => __DIR__ . '/../..' . '/app/Repositories/EmailVerificationRepository.php',
+        'App\\Repositories\\ExpenseRepository' => __DIR__ . '/../..' . '/app/Repositories/ExpenseRepository.php',
+        'App\\Repositories\\IncomeRepository' => __DIR__ . '/../..' . '/app/Repositories/IncomeRepository.php',
+        'App\\Repositories\\InvestmentRepository' => __DIR__ . '/../..' . '/app/Repositories/InvestmentRepository.php',
+        'App\\Repositories\\LoanRepository' => __DIR__ . '/../..' . '/app/Repositories/LoanRepository.php',
         'App\\Repositories\\LoginHistoryRepository' => __DIR__ . '/../..' . '/app/Repositories/LoginHistoryRepository.php',
+        'App\\Repositories\\NotificationRepository' => __DIR__ . '/../..' . '/app/Repositories/NotificationRepository.php',
         'App\\Repositories\\PasswordResetRepository' => __DIR__ . '/../..' . '/app/Repositories/PasswordResetRepository.php',
+        'App\\Repositories\\ReportRepository' => __DIR__ . '/../..' . '/app/Repositories/ReportRepository.php',
         'App\\Repositories\\SystemRepository' => __DIR__ . '/../..' . '/app/Repositories/SystemRepository.php',
         'App\\Repositories\\UserRepository' => __DIR__ . '/../..' . '/app/Repositories/UserRepository.php',
         'App\\Repositories\\UserSessionRepository' => __DIR__ . '/../..' . '/app/Repositories/UserSessionRepository.php',
         'App\\Services\\AuthService' => __DIR__ . '/../..' . '/app/Services/AuthService.php',
+        'App\\Services\\BillReminderService' => __DIR__ . '/../..' . '/app/Services/BillReminderService.php',
+        'App\\Services\\BudgetService' => __DIR__ . '/../..' . '/app/Services/BudgetService.php',
+        'App\\Services\\ExpenseService' => __DIR__ . '/../..' . '/app/Services/ExpenseService.php',
+        'App\\Services\\IncomeService' => __DIR__ . '/../..' . '/app/Services/IncomeService.php',
+        'App\\Services\\InvestmentService' => __DIR__ . '/../..' . '/app/Services/InvestmentService.php',
+        'App\\Services\\LoanService' => __DIR__ . '/../..' . '/app/Services/LoanService.php',
         'App\\Services\\MailService' => __DIR__ . '/../..' . '/app/Services/MailService.php',
+        'App\\Services\\NotificationService' => __DIR__ . '/../..' . '/app/Services/NotificationService.php',
+        'App\\Services\\ReportService' => __DIR__ . '/../..' . '/app/Services/ReportService.php',
         'App\\Services\\Router' => __DIR__ . '/../..' . '/app/Services/Router.php',
         'App\\Services\\SystemHealthService' => __DIR__ . '/../..' . '/app/Services/SystemHealthService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
@@ -143,6 +177,14 @@ class ComposerStaticInitf6d73b5fd273be056b51b71d3aeb77df
         'Dotenv\\Util\\Regex' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Util/Regex.php',
         'Dotenv\\Util\\Str' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Util/Str.php',
         'Dotenv\\Validator' => __DIR__ . '/..' . '/vlucas/phpdotenv/src/Validator.php',
+        'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
+        'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
+        'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',
+        'Firebase\\JWT\\JWK' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWK.php',
+        'Firebase\\JWT\\JWT' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWT.php',
+        'Firebase\\JWT\\JWTExceptionWithPayloadInterface' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWTExceptionWithPayloadInterface.php',
+        'Firebase\\JWT\\Key' => __DIR__ . '/..' . '/firebase/php-jwt/src/Key.php',
+        'Firebase\\JWT\\SignatureInvalidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/SignatureInvalidException.php',
         'GrahamCampbell\\ResultType\\Error' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Error.php',
         'GrahamCampbell\\ResultType\\Result' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Result.php',
         'GrahamCampbell\\ResultType\\Success' => __DIR__ . '/..' . '/graham-campbell/result-type/src/Success.php',

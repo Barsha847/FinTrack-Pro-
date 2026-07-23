@@ -9,6 +9,9 @@ use App\Repositories\PasswordResetRepository;
 use App\Repositories\UserSessionRepository;
 use App\Repositories\LoginHistoryRepository;
 use App\Repositories\ActivityLogRepository;
+use App\Repositories\RefreshTokenRepository;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use App\Services\MailService;
 use App\Database\Database;
 use App\Helpers\IpHelper;
@@ -27,6 +30,7 @@ class AuthService
     private UserSessionRepository $sessionRepo;
     private LoginHistoryRepository $loginHistRepo;
     private ActivityLogRepository $activityLogRepo;
+    private RefreshTokenRepository $refreshTokenRepo;
     private MailService $mailService;
 
     public function __construct()
@@ -37,7 +41,75 @@ class AuthService
         $this->sessionRepo = new UserSessionRepository();
         $this->loginHistRepo = new LoginHistoryRepository();
         $this->activityLogRepo = new ActivityLogRepository();
+        $this->refreshTokenRepo = new RefreshTokenRepository();
         $this->mailService = new MailService();
+    }
+
+    /**
+     * Generate secure Access and Refresh tokens for a user.
+     * 
+     * @param array $user
+     * @return array Array containing raw tokens: ['accessToken' => ..., 'refreshToken' => ...]
+     */
+    public function generateTokens(array $user): array
+    {
+        $secrets = $this->getJwtSecrets();
+        $primaryKey = $secrets[0];
+
+        $issuedAt = time();
+        $accessLifetime = 900; // 15 minutes
+        $payload = [
+            'iss' => 'FinTrack Pro',
+            'aud' => 'FinTrack Pro Client',
+            'iat' => $issuedAt,
+            'exp' => $issuedAt + $accessLifetime,
+            'sub' => $user['id'],
+            'role' => $user['role'] ?? 'user',
+            'email' => $user['email']
+        ];
+
+        $accessToken = JWT::encode($payload, $primaryKey, 'HS256');
+        
+        // Generate high entropy 64-char hex refresh token
+        $refreshToken = bin2hex(random_bytes(32));
+
+        return [
+            'accessToken' => $accessToken,
+            'refreshToken' => $refreshToken
+        ];
+    }
+
+    /**
+     * Get secret keys list supporting key rotation.
+     * 
+     * @return array
+     */
+    public function getJwtSecrets(): array
+    {
+        $candidates = [];
+        if (!empty($_ENV['JWT_SECRET_KEYS'])) {
+            $candidates = array_merge($candidates, explode(',', $_ENV['JWT_SECRET_KEYS']));
+        }
+        if (!empty($_ENV['JWT_SECRET'])) {
+            $candidates[] = $_ENV['JWT_SECRET'];
+        }
+        if (!empty($_ENV['APP_KEY'])) {
+            $candidates[] = $_ENV['APP_KEY'];
+        }
+
+        $validSecrets = [];
+        foreach ($candidates as $candidate) {
+            $trimmed = trim($candidate);
+            if (strlen($trimmed) >= 32) {
+                $validSecrets[] = $trimmed;
+            }
+        }
+
+        if (empty($validSecrets)) {
+            $validSecrets[] = 'fintrack_pro_default_jwt_secret_key_rotation_fallback';
+        }
+
+        return $validSecrets;
     }
 
     /**
@@ -204,7 +276,7 @@ class AuthService
             ");
             $stmtSet->execute([':user_id' => $user['id']]);
 
-            $this->activityLogRepo->record($user['id'], 'Email Verified', 'Authentication', 'User email address verified successfully.', null, $ip);
+            $this->activityLogRepo->record($user['id'], 'Email Verified', 'Authentication', 'User email address verified successfully.', ['user_agent' => $userAgent], $ip);
 
             // Establish secure session
             if (session_status() === PHP_SESSION_NONE) {
@@ -220,6 +292,11 @@ class AuthService
                 $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
             }
 
+            // Generate JWT and Refresh token
+            $tokens = $this->generateTokens($user);
+            $tokenHash = hash('sha256', $tokens['refreshToken']);
+            $this->refreshTokenRepo->create($user['id'], $tokenHash, $ip, $userAgent, 604800); // 7 days
+
             // Sync user session record
             $this->sessionRepo->create($user['id'], session_id(), $ip, $userAgent, 86400);
 
@@ -232,13 +309,25 @@ class AuthService
             throw $e;
         }
 
+        $safeUser = [
+            'id' => $user['id'],
+            'full_name' => $user['full_name'],
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'phone_number' => $user['phone_number'],
+            'email_verified' => (bool)$user['email_verified'],
+            'role' => $user['role'],
+            'profile_image' => $user['profile_image'],
+            'created_at' => $user['created_at']
+        ];
+
         return [
             'success' => true,
             'message' => 'Email verified successfully.',
             'data' => [
-                'full_name' => $user['full_name'],
-                'email' => $user['email'],
-                'currency' => 'INR',
+                'accessToken' => $tokens['accessToken'],
+                'refreshToken' => $tokens['refreshToken'],
+                'user' => $safeUser,
                 'csrf_token' => $_SESSION['csrf_token']
             ]
         ];
@@ -317,10 +406,12 @@ class AuthService
     public function login(string $email, string $password, ?string $ip, ?string $userAgent): array
     {
         $email = trim(strtolower($email));
+        
         $user = $this->userRepo->findByEmail($email);
 
         if (!$user) {
             $this->loginHistRepo->record(null, $email, $ip, $userAgent, 'failed', 'Invalid credentials');
+            $this->activityLogRepo->record(null, 'Failed Login', 'Authentication', "Failed login attempt for email: {$email}", ['user_agent' => $userAgent], $ip);
             throw new Exception("Invalid email or password.", 401);
         }
 
@@ -329,12 +420,14 @@ class AuthService
             $lockSeconds = strtotime($user['locked_until']) - time();
             $lockMinutes = ceil($lockSeconds / 60);
             $this->loginHistRepo->record($user['id'], $email, $ip, $userAgent, 'blocked', 'Account locked');
+            $this->activityLogRepo->record($user['id'], 'Blocked Login', 'Authentication', "Attempted login on locked account. Lock expires in {$lockMinutes} minute(s).", ['user_agent' => $userAgent], $ip);
             throw new Exception("This account is temporarily locked due to excessive failed attempts. Please retry in {$lockMinutes} minute(s).", 423);
         }
 
         // Assert Account Status
         if ($user['account_status'] !== 'active') {
             $this->loginHistRepo->record($user['id'], $email, $ip, $userAgent, 'blocked', "Status: {$user['account_status']}");
+            $this->activityLogRepo->record($user['id'], 'Blocked Login', 'Authentication', "Access denied for non-active user. Status: {$user['account_status']}", ['user_agent' => $userAgent], $ip);
             throw new Exception("This account is currently {$user['account_status']}. Access denied.", 403);
         }
 
@@ -345,11 +438,12 @@ class AuthService
             
             if ($attempts >= 5) {
                 $this->userRepo->lockAccount($user['id'], 15);
-                $this->activityLogRepo->record($user['id'], 'Account Locked', 'Authentication', 'Account locked for 15 minutes due to 5 failed attempts.', null, $ip);
+                $this->activityLogRepo->record($user['id'], 'Blocked Login', 'Authentication', 'Account locked for 15 minutes due to 5 failed attempts.', ['user_agent' => $userAgent], $ip);
                 throw new Exception("Incorrect password. This account is now locked for 15 minutes.", 423);
             }
 
             $remaining = 5 - $attempts;
+            $this->activityLogRepo->record($user['id'], 'Failed Login', 'Authentication', "Incorrect password attempt. Current count: {$attempts}", ['user_agent' => $userAgent], $ip);
             throw new Exception("Invalid email or password. {$remaining} attempts remaining.", 401);
         }
 
@@ -390,12 +484,20 @@ class AuthService
             // Establish session CSRF
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
+            // Generate JWT and Refresh token
+            $tokens = $this->generateTokens($user);
+            $tokenHash = hash('sha256', $tokens['refreshToken']);
+
+            // Invalidate previous refresh tokens for this user on login
+            $this->refreshTokenRepo->deleteAllForUser($user['id']);
+            $this->refreshTokenRepo->create($user['id'], $tokenHash, $ip, $userAgent, 604800); // 7 days
+
             // Sync user session record
             $this->sessionRepo->create($user['id'], session_id(), $ip, $userAgent, 86400);
 
             // Record success audits
             $this->loginHistRepo->record($user['id'], $email, $ip, $userAgent, 'success');
-            $this->activityLogRepo->record($user['id'], 'Login Successful', 'Authentication', 'User successfully authenticated secure session.', null, $ip);
+            $this->activityLogRepo->record($user['id'], 'Login Successful', 'Authentication', 'User successfully authenticated secure session.', ['user_agent' => $userAgent], $ip);
 
             Database::commit();
         } catch (\Throwable $e) {
@@ -403,14 +505,27 @@ class AuthService
             throw $e;
         }
 
+        $safeUser = [
+            'id' => $user['id'],
+            'full_name' => $user['full_name'],
+            'username' => $user['username'],
+            'email' => $user['email'],
+            'phone_number' => $user['phone_number'],
+            'email_verified' => (bool)$user['email_verified'],
+            'role' => $user['role'],
+            'profile_image' => $user['profile_image'],
+            'created_at' => $user['created_at']
+        ];
+
         return [
             'success' => true,
             'message' => 'Login successful.',
             'data' => [
-                'full_name' => $user['full_name'],
-                'email' => $user['email'],
-                'currency' => $currency,
-                'csrf_token' => $_SESSION['csrf_token']
+                'accessToken' => $tokens['accessToken'],
+                'refreshToken' => $tokens['refreshToken'],
+                'user' => $safeUser,
+                'csrf_token' => $_SESSION['csrf_token'],
+                'currency' => $currency
             ]
         ];
     }

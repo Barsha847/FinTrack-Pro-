@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+
+
 /**
  * FinTrack Pro - Front Controller
  * 
@@ -38,9 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// 3. Force API responses to be JSON UTF-8
 if (!headers_sent()) {
     header('Content-Type: application/json; charset=utf-8');
+    header("X-Frame-Options: DENY");
+    header("X-Content-Type-Options: nosniff");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    header("Content-Security-Policy: default-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; frame-ancestors 'none';");
 }
 
 // 4. Safely extract HTTP request parameters

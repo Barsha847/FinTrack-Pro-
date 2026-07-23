@@ -7,7 +7,7 @@ import { initSidebar } from './sidebar.js';
 import { initNavigation } from './navigation.js';
 import { initValidation } from './validation.js';
 import { initAnimations } from './animation.js';
-import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast, checkPageAuth, initGlobalNotifications } from './utils.js';
+import { initRipples, initIcons, syncUserProfile, setupLogout, initGlobalModalManager, showToast, checkPageAuth, initGlobalNotifications, fetchApi, getRoutePath } from './utils.js';
 import { initDashboard } from './dashboard.js';
 import { initIncomePage } from './income.js';
 import { initExpensesPage } from './expenses.js';
@@ -69,9 +69,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     const currentFile = window.location.pathname.split('/').pop() || '';
     const isProtectedPage = PROTECTED_PAGES.has(currentFile);
 
+    // Redirect authenticated users away from login/signup to dashboard
+    if (currentFile === 'login.html' || currentFile === 'signup.html' || currentFile === 'verify-email.html' || currentFile === 'forgot-password.html') {
+      try {
+        const response = await fetchApi('/api/auth/me');
+        if (response && response.ok) {
+          const result = await response.json();
+          if (result && result.success && result.data && result.data.user) {
+            window.location.href = getRoutePath('dashboard');
+            return;
+          }
+        }
+      } catch (err) {
+        // Safe to ignore authentication checks on unprotected entry points
+      }
+    }
+
     // Only run authentication guard on protected application pages
     if (isProtectedPage) {
       await checkPageAuth();
+
+      // Silent Session Check every 60 seconds (Auto Session Check)
+      setInterval(async () => {
+        try {
+          const response = await fetchApi('/api/auth/me');
+          if (!response || !response.ok) {
+            window.location.href = getRoutePath('login');
+          }
+        } catch (err) {
+          console.error("Auto-session validator check failure:", err);
+        }
+      }, 60000);
     }
 
     // Initialize all subsystems
