@@ -1,3 +1,4 @@
+console.log('[FINTRACK DEBUG] NEW AUTH JS LOADED (app.js)');
 /**
  * FinTrack Pro - Main Entry Point (ES6 Module Core)
  */
@@ -76,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (response && response.ok) {
           const result = await response.json();
           if (result && result.success && result.data && result.data.user) {
-            window.location.href = getRoutePath('dashboard');
+            window.location.replace(getRoutePath('dashboard'));
             return;
           }
         }
@@ -94,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
           const response = await fetchApi('/api/auth/me');
           if (!response || !response.ok) {
-            window.location.href = getRoutePath('login');
+            window.location.replace(getRoutePath('login'));
           }
         } catch (err) {
           console.error("Auto-session validator check failure:", err);
@@ -208,3 +209,13 @@ function initContactForm() {
     }, 1200);
   });
 }
+
+// Ensure back-forward cache restorations re-verify authentication
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    const currentFile = window.location.pathname.split('/').pop() || '';
+    if (PROTECTED_PAGES.has(currentFile)) {
+      checkPageAuth();
+    }
+  }
+});

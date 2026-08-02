@@ -1,3 +1,4 @@
+console.log('[FINTRACK DEBUG] NEW AUTH JS LOADED (utils.js)');
 /**
  * FinTrack Pro - Utility Functions & Component Helpers
  */
@@ -347,27 +348,39 @@ export function initGlobalNotifications() {
  * Sets up global logout click handlers with confirmation prompts
  */
 export function setupLogout() {
+  console.log("[AUTH DEBUG] setupLogout called");
   const logoutElements = document.querySelectorAll('.logout, #sidebarLogout, .sidebar-logout-btn');
+  console.log("[AUTH DEBUG] Found logout elements:", logoutElements.length);
   logoutElements.forEach(el => {
     // Clear old listeners if any by cloning, or just override
     const newEl = el.cloneNode(true);
     if (el.parentNode) {
       el.parentNode.replaceChild(newEl, el);
     }
+    console.log("[AUTH DEBUG] Attached listener to element:", newEl.className, newEl.id);
 
     newEl.addEventListener('click', async (e) => {
       e.preventDefault();
+      console.log("[AUTH DEBUG] Logout button clicked", e.target);
       if (confirm("Are you sure you want to sign out from FinTrack Pro?")) {
+        console.log("[AUTH DEBUG] Sending logout request");
         showToast("Signing you out of the secure session...", "info", "Logout Redirect");
         try {
-          await fetchApi('/api/auth/logout', { method: 'POST' });
+          const res = await fetchApi('/api/auth/logout', { method: 'POST' });
+          console.log("[AUTH DEBUG] Logout response status:", res ? res.status : "unknown");
+          if(res && typeof res.clone === 'function') {
+            const body = await res.clone().text();
+            console.log("[AUTH DEBUG] Logout response:", body);
+          }
         } catch (err) {
           console.error("Logout error:", err);
         }
+        console.log("[AUTH DEBUG] Session no longer authenticated");
         sessionStorage.clear();
         localStorage.clear();
+        console.log("[AUTH DEBUG] Redirecting to Sign In", getRoutePath('login'));
         setTimeout(() => {
-          window.location.href = getRoutePath('login');
+          window.location.replace(getRoutePath('login'));
         }, 1000);
       }
     });
@@ -421,9 +434,9 @@ export async function fetchApi(url, options = {}) {
         return response;
       }
 
-      // If it is /api/auth/me, we only refresh if we are not on the login/signup page.
+      // If it is /api/auth/me, we only refresh if we are not on the login/signup/auth pages.
       const path = window.location.pathname;
-      if (url.includes('/api/auth/me') && (path.includes('login.html') || path.includes('signup.html'))) {
+      if (url.includes('/api/auth/me') && (path.includes('login.html') || path.includes('signup.html') || path.includes('verify-email.html') || path.includes('forgot-password.html') || path.includes('reset-password.html'))) {
         return response;
       }
 
@@ -475,7 +488,7 @@ export async function fetchApi(url, options = {}) {
           if (!isUnprotected) {
             const loginPath = getRoutePath('login');
             if (!window.location.pathname.endsWith('/login.html') && !window.location.pathname.endsWith('/login')) {
-              window.location.href = loginPath;
+              window.location.replace(loginPath);
             }
           }
           return null;
@@ -592,7 +605,7 @@ export async function checkPageAuth() {
     if (!result || !result.success || !result.data || !result.data.user) {
       sessionStorage.clear();
       localStorage.clear();
-      window.location.href = getRoutePath('login');
+      window.location.replace(getRoutePath('login'));
       return;
     }
 
@@ -607,7 +620,7 @@ export async function checkPageAuth() {
     if (currentPage === 'admin.html' && user.role !== 'admin') {
       showToast("Access denied. Admin authorization required.", "danger", "Access Forbidden");
       setTimeout(() => {
-        window.location.href = getRoutePath('dashboard');
+        window.location.replace(getRoutePath('dashboard'));
       }, 1500);
       return;
     }
@@ -615,7 +628,6 @@ export async function checkPageAuth() {
     console.error("Auth check failure:", err);
     sessionStorage.clear();
     localStorage.clear();
-    window.location.href = getRoutePath('login');
+    window.location.replace(getRoutePath('login'));
   }
 }
-
