@@ -1,0 +1,125 @@
+name: FinTrack Pro CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: fintrack_test_db
+          POSTGRES_USER: fintrack_test_user
+          POSTGRES_PASSWORD: testing_ci_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      APP_NAME: FinTrackProCI
+      APP_ENV: testing
+      APP_URL: http://127.0.0.1:8000
+      APP_KEY: ${{ secrets.APP_KEY || 'dummy_ci_test_key_minimum_32_characters_long' }}
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: fintrack_test_db
+      DB_USERNAME: fintrack_test_user
+      DB_PASSWORD: testing_ci_password
+      DB_SSLMODE: prefer
+      JWT_SECRET: dummy_ci_jwt_secret_minimum_32_characters_long
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo, pdo_pgsql, mbstring, openssl
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PHP Dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install NPM Dependencies
+        run: |
+          if [ -f "package-lock.json" ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Code Security - Secret Scanner
+        run: npm run scan:secrets
+
+      - name: Code Security - NPM Audit
+        run: npm run security
+
+      - name: Code Security - Composer Audit
+        run: composer security
+
+      - name: Static Analysis - PHPStan
+        run: composer analyse
+
+      - name: Database Initialization & Safety Check
+        run: |
+          if [ "$APP_ENV" != "testing" ]; then
+            echo "ABORT: APP_ENV is not testing"
+            exit 1
+          fi
+          if [[ "$DB_DATABASE" != *"test"* ]]; then
+            echo "ABORT: DB_DATABASE does not contain 'test'"
+            exit 1
+          fi
+          php database/migrate.php
+
+      - name: Test Fixtures - Seeding Users
+        run: php database/seeders/ci_test_seeder.php
+
+      - name: Backend Tests - PHPUnit
+        run: composer test
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Real Application (Test Environment)
+        run: |
+          # Start the router on port 8001 (matching playwright.config.js)
+          php -S 127.0.0.1:8001 router.php &
+          # Wait for the server to become responsive
+          npx wait-on tcp:127.0.0.1:8001
+
+      - name: Regression & Security Gates - E2E Tests
+        run: npx playwright test
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

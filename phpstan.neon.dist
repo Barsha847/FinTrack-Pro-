@@ -1,0 +1,16 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 4
+    paths:
+        - app
+        - config
+        - database
+        - routes
+    excludePaths:
+        - vendor/*
+        - tests/*
+    ignoreErrors:
+        - '#Variable \$_SESSION might not be defined.#'
+    reportUnmatchedIgnoredErrors: false

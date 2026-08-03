@@ -14,8 +14,27 @@
             "Database\\": "database/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": "phpstan analyse --memory-limit=256M",
+        "security": "composer audit",
+        "verify": [
+            "@security",
+            "@analyse",
+            "@test"
+        ]
+    },
     "config": {
         "sort-packages": true,
         "optimize-autoloader": true
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^13.2"
     }
 }

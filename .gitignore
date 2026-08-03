@@ -28,3 +28,10 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 .DS_Store
+
+# Testing
+.env.testing
+/node_modules/
+.phpunit.result.cache
+playwright-report/
+test-results/

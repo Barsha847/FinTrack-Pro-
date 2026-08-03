@@ -1,0 +1,30 @@
+{
+  "name": "fintrack-pro",
+  "version": "1.0.0",
+  "description": "> A modern, secure, and intelligent Personal Finance Management System built with PHP, PostgreSQL, HTML, CSS, and JavaScript.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "npx playwright test",
+    "security": "npm audit --audit-level=high",
+    "scan:secrets": "node scripts/secret-scanner.js",
+    "verify:all": "npm run security && composer security && npm run scan:secrets && composer analyse && composer test && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Barsha847/FinTrack-Pro-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Barsha847/FinTrack-Pro-/issues"
+  },
+  "homepage": "https://github.com/Barsha847/FinTrack-Pro-#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}
