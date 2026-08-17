@@ -9,7 +9,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../bootstrap.php';
 
 use App\Database\Database;
-use App\Models\User;
+use App\Repositories\UserRepository;
 
 echo "===================================================\n";
 echo "FinTrack Pro - CI Database Seeding Utility\n";
@@ -31,25 +31,37 @@ try {
     Database::transaction(function() {
         echo "Seeding Test Users...\n";
         
-        $userModel = new User();
+        $userRepo = new UserRepository();
         
         // Seed Test User A
-        $userAId = $userModel->create([
-            'name' => 'Test User A',
-            'email' => 'test@example.com',
-            'password' => password_hash('TestPassword123!', PASSWORD_BCRYPT),
-            'currency' => 'USD',
-            'email_verified_at' => date('Y-m-d H:i:s')
-        ]);
+        $userA = $userRepo->findByEmail('test@example.com');
+        if (!$userA) {
+            $userRepo->create([
+                'full_name' => 'Test User A',
+                'username' => 'testusera',
+                'email' => 'test@example.com',
+                'password_hash' => password_hash('TestPassword123!', PASSWORD_BCRYPT),
+                'email_verified' => true,
+                'phone_verified' => true,
+                'account_status' => 'active',
+                'role' => 'user'
+            ]);
+        }
         
         // Seed Test User B
-        $userBId = $userModel->create([
-            'name' => 'Test User B',
-            'email' => 'test-b@example.com',
-            'password' => password_hash('TestPassword123!', PASSWORD_BCRYPT),
-            'currency' => 'USD',
-            'email_verified_at' => date('Y-m-d H:i:s')
-        ]);
+        $userB = $userRepo->findByEmail('test-b@example.com');
+        if (!$userB) {
+            $userRepo->create([
+                'full_name' => 'Test User B',
+                'username' => 'testuserb',
+                'email' => 'test-b@example.com',
+                'password_hash' => password_hash('TestPassword123!', PASSWORD_BCRYPT),
+                'email_verified' => true,
+                'phone_verified' => true,
+                'account_status' => 'active',
+                'role' => 'user'
+            ]);
+        }
         
         echo "  [OK] Test users seeded successfully.\n\n";
         
