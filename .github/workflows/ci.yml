@@ -36,7 +36,7 @@ jobs:
     env:
       APP_NAME: FinTrackProCI
       APP_ENV: testing
-      APP_URL: http://127.0.0.1:8000
+      APP_URL: http://127.0.0.1:8001
       APP_KEY: ${{ secrets.APP_KEY || 'dummy_ci_test_key_minimum_32_characters_long' }}
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
@@ -55,6 +55,7 @@ jobs:
         with:
           php-version: '8.3'
           extensions: pdo, pdo_pgsql, mbstring, openssl
+          ini-values: variables_order="EGPCS"
           coverage: none
 
       - name: Setup Node.js
@@ -72,6 +73,27 @@ jobs:
           else
             npm install
           fi
+
+      - name: Setup Ephemeral Test Environment Files
+        run: |
+          cat << 'EOF' > .env
+          APP_NAME=FinTrackProCI
+          APP_ENV=testing
+          APP_URL=http://127.0.0.1:8001
+          APP_KEY=${{ secrets.APP_KEY || 'dummy_ci_test_key_minimum_32_characters_long' }}
+          DB_HOST=127.0.0.1
+          DB_PORT=5432
+          DB_DATABASE=fintrack_test_db
+          DB_USERNAME=fintrack_test_user
+          DB_PASSWORD=testing_ci_password
+          DB_SSLMODE=prefer
+          JWT_SECRET=dummy_ci_jwt_secret_minimum_32_characters_long
+          MAIL_HOST=127.0.0.1
+          MAIL_PORT=1025
+          MAIL_FROM_ADDRESS=test@example.com
+          MAIL_FROM_NAME=FinTrackTest
+          EOF
+          cp .env .env.testing
 
       - name: Code Security - Secret Scanner
         run: npm run scan:secrets
