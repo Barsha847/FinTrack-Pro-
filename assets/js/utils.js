@@ -419,9 +419,9 @@ export async function fetchApi(url, options = {}) {
 
   options.credentials = 'include';
 
-  // Support accessing backend from standard front-end Live Server port 5500
+  // Support accessing backend from standard front-end Live Server port 5500 if used
   let targetUrl = url;
-  if (window.location.port !== '8000' && url.startsWith('/api/')) {
+  if (window.location.port === '5500' && url.startsWith('/api/')) {
     targetUrl = 'http://localhost:8000' + url;
   }
 
@@ -443,7 +443,7 @@ export async function fetchApi(url, options = {}) {
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          const refreshUrl = window.location.port !== '8000' ? 'http://localhost:8000/api/auth/refresh' : '/api/auth/refresh';
+          const refreshUrl = window.location.port === '5500' ? 'http://localhost:8000/api/auth/refresh' : '/api/auth/refresh';
           const refreshResponse = await fetch(refreshUrl, {
             method: 'POST',
             credentials: 'include'
