@@ -12,14 +12,14 @@ module.exports = defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:8001',
+    baseURL: 'http://127.0.0.1:8001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
   webServer: {
-    command: 'php -S localhost:8001 router.php',
+    command: 'php -S 127.0.0.1:8001 router.php',
     port: 8001,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     env: {
       APP_ENV: 'testing',
       DB_DATABASE: 'fintrack_test_db'
