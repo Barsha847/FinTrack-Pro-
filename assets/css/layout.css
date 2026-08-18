@@ -127,6 +127,8 @@ section {
 }
 
 .dashboard-header {
+  position: relative;
+  z-index: var(--z-nav);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -135,4 +137,6 @@ section {
 
 .dashboard-content {
   flex: 1;
+  position: relative;
+  z-index: var(--z-base);
 }

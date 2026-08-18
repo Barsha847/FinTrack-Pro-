@@ -117,9 +117,11 @@ function verifyPageAccess() {
   if (path.includes('reset-password.html')) {
     const email = sessionStorage.getItem('reset_email') || new URLSearchParams(window.location.search).get('email');
     const token = sessionStorage.getItem('reset_token') || new URLSearchParams(window.location.search).get('token');
-    if (!email && !token) {
-      window.location.href = getRoutePath('login');
-      return;
+    if (token) {
+      sessionStorage.setItem('reset_token', token);
+    }
+    if (email) {
+      sessionStorage.setItem('reset_email', email);
     }
   }
 }

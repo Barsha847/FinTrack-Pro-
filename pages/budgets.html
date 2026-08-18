@@ -147,19 +147,19 @@
             <i data-lucide="moon" class="moon-icon"></i>
             <i data-lucide="sun" class="sun-icon"></i>
           </button>
-          
+          <!-- Profile -->
           <div class="dropdown-wrapper" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
-            <div class="d-flex align-center gap-2" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
+            <div class="d-flex align-center gap-2 profile-dropdown-trigger user-menu-btn" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
               <div class="avatar" style="width: 36px; height: 36px;">JD</div>
               <div class="d-none d-md-flex flex-column">
                 <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
                 <span style="font-size: 10px; color: var(--text-muted);">Standard Tier</span>
               </div>
             </div>
-            <div class="dropdown-menu" id="profileDropdown" style="width: 200px;">
+            <div class="dropdown-menu profile-menu" id="profileDropdown" style="width: 200px;">
               <div class="profile-menu-links">
                 <a href="profile.html" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
-                <a href="login.html" class="profile-menu-link logout"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out</a>
+                <a href="login.html" class="profile-menu-link logout" id="logoutBtn"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out</a>
               </div>
             </div>
           </div>

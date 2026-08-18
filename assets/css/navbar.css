@@ -296,6 +296,12 @@
 /* Dropdown Container */
 .dropdown-wrapper {
   position: relative;
+  z-index: var(--z-nav);
+}
+
+.dropdown-wrapper:has(.dropdown-menu.show),
+.dropdown-wrapper.active {
+  z-index: var(--z-modal);
 }
 
 /* Base Dropdown Menu */
@@ -332,6 +338,7 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+  z-index: var(--z-modal);
 }
 
 /* Header/Footer inside dropdowns */

@@ -62,13 +62,21 @@ if (is_file($file)) {
     return false;
 }
 
-// 5. Fallback to index.html for root path or single page application navigation
-if ($path === '/' || !file_exists($file)) {
+// 5. Fallback for root path
+if ($path === '/') {
     $indexFile = __DIR__ . '/index.html';
     if (file_exists($indexFile)) {
         require_once $indexFile;
         exit;
     }
+}
+
+// 6. Handle 404 Not Found for non-existent routes/pages
+http_response_code(404);
+$notFoundFile = __DIR__ . '/pages/404.html';
+if (file_exists($notFoundFile)) {
+    require_once $notFoundFile;
+    exit;
 }
 
 return false;

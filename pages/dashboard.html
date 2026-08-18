@@ -233,7 +233,7 @@
           
           <!-- User Profile Dropdown Badge -->
           <div class="dropdown-wrapper" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
-            <div class="d-flex align-center gap-2" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
+            <div class="d-flex align-center gap-2 profile-dropdown-trigger user-menu-btn" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
               <div class="avatar" style="width: 36px; height: 36px; font-size: 12px; font-weight: 700;">JD</div>
               <div class="d-none d-md-flex flex-column">
                 <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
@@ -242,7 +242,7 @@
             </div>
 
             <!-- Profile Dropdown options -->
-            <div class="dropdown-menu" id="profileDropdown" style="width: 220px;">
+            <div class="dropdown-menu profile-menu" id="profileDropdown" style="width: 220px;">
               <div class="profile-menu-info">
                 <div class="avatar" style="width: 40px; height: 40px; font-size: 14px; font-weight: 700;">JD</div>
                 <div>
@@ -258,7 +258,7 @@
                   <i data-lucide="settings" style="width: 16px; height: 16px;"></i> Settings
                 </a>
                 <div style="border-top: 1px solid var(--border-color); margin: 0.25rem 0;"></div>
-                <a href="login.html" class="profile-menu-link logout">
+                <a href="login.html" class="profile-menu-link logout" id="logoutBtn">
                   <i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out
                 </a>
               </div>

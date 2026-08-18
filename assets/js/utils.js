@@ -230,8 +230,6 @@ export function escapeHTML(str) {
  */
 export function initGlobalNotifications() {
   const notifBtn = document.getElementById('notificationTriggerBtn');
-  if (!notifBtn) return;
-
   const notifMenu = document.getElementById('notificationDropdown');
   const badgeDot = document.getElementById('notificationBadgeDot');
   const profileBtn = document.getElementById('profileTriggerBtn');
@@ -362,27 +360,16 @@ export function setupLogout() {
     newEl.addEventListener('click', async (e) => {
       e.preventDefault();
       console.log("[AUTH DEBUG] Logout button clicked", e.target);
-      if (confirm("Are you sure you want to sign out from FinTrack Pro?")) {
-        console.log("[AUTH DEBUG] Sending logout request");
-        showToast("Signing you out of the secure session...", "info", "Logout Redirect");
-        try {
-          const res = await fetchApi('/api/auth/logout', { method: 'POST' });
-          console.log("[AUTH DEBUG] Logout response status:", res ? res.status : "unknown");
-          if(res && typeof res.clone === 'function') {
-            const body = await res.clone().text();
-            console.log("[AUTH DEBUG] Logout response:", body);
-          }
-        } catch (err) {
-          console.error("Logout error:", err);
-        }
-        console.log("[AUTH DEBUG] Session no longer authenticated");
-        sessionStorage.clear();
-        localStorage.clear();
-        console.log("[AUTH DEBUG] Redirecting to Sign In", getRoutePath('login'));
-        setTimeout(() => {
-          window.location.replace(getRoutePath('login'));
-        }, 1000);
+      showToast("Signing you out of the secure session...", "info", "Logout Redirect");
+      try {
+        const res = await fetchApi('/api/auth/logout', { method: 'POST' });
+        console.log("[AUTH DEBUG] Logout response status:", res ? res.status : "unknown");
+      } catch (err) {
+        console.error("Logout error:", err);
       }
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.replace(getRoutePath('login'));
     });
   });
 }
