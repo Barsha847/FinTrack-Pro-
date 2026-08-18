@@ -33,10 +33,17 @@ try {
         
         $userRepo = new UserRepository();
         
+        $db = Database::connection();
+        $stmtSet = $db->prepare("
+            INSERT INTO user_settings (id, user_id, currency, timezone, date_format, theme)
+            VALUES (gen_random_uuid(), :user_id, 'INR', 'Asia/Kolkata', 'DD-MM-YYYY', 'system')
+            ON CONFLICT (user_id) DO NOTHING
+        ");
+
         // Seed Test User A
         $userA = $userRepo->findByEmail('test@example.com');
         if (!$userA) {
-            $userRepo->create([
+            $userAId = $userRepo->create([
                 'full_name' => 'Test User A',
                 'username' => 'testusera',
                 'email' => 'test@example.com',
@@ -46,12 +53,15 @@ try {
                 'account_status' => 'active',
                 'role' => 'user'
             ]);
+        } else {
+            $userAId = $userA['id'];
         }
+        $stmtSet->execute([':user_id' => $userAId]);
         
         // Seed Test User B
         $userB = $userRepo->findByEmail('test-b@example.com');
         if (!$userB) {
-            $userRepo->create([
+            $userBId = $userRepo->create([
                 'full_name' => 'Test User B',
                 'username' => 'testuserb',
                 'email' => 'test-b@example.com',
@@ -61,7 +71,10 @@ try {
                 'account_status' => 'active',
                 'role' => 'user'
             ]);
+        } else {
+            $userBId = $userB['id'];
         }
+        $stmtSet->execute([':user_id' => $userBId]);
         
         echo "  [OK] Test users seeded successfully.\n\n";
         

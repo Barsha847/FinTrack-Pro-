@@ -218,18 +218,10 @@ class AuthController
             $this->setAuthCookies($result['data']['accessToken'], $result['data']['refreshToken']);
             
             ResponseHelper::success($result['message'], $result['data']);
-        } catch (\Throwable $e) {
-            if (!headers_sent()) {
-                header('Content-Type: application/json; charset=utf-8');
-                http_response_code(500);
-            }
-            echo json_encode([
-                "success" => false,
-                "message" => $e->getMessage(),
-                "file" => $e->getFile(),
-                "line" => $e->getLine()
-            ]);
-            exit;
+        } catch (Exception $e) {
+            $code = (int)$e->getCode();
+            $statusCode = ($code >= 400 && $code < 600) ? $code : 500;
+            ResponseHelper::error($e->getMessage(), $statusCode);
         }
     }
 

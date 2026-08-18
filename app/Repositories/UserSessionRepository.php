@@ -40,6 +40,12 @@ class UserSessionRepository
                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + (:expires_seconds * INTERVAL '1 second'), 
                 CURRENT_TIMESTAMP
             )
+            ON CONFLICT (session_id) DO UPDATE SET
+                user_id = EXCLUDED.user_id,
+                ip_address = EXCLUDED.ip_address,
+                user_agent = EXCLUDED.user_agent,
+                last_activity_at = CURRENT_TIMESTAMP,
+                expires_at = EXCLUDED.expires_at
         ");
         return $stmt->execute([
             ':user_id' => $userId,
