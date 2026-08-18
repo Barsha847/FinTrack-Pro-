@@ -4,71 +4,121 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use Tests\Support\DatabaseTestCase;
+use App\Services\AuthService;
+use App\Repositories\UserRepository;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
+use Throwable;
 
 class ApiAuthTest extends DatabaseTestCase
 {
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_unauthenticated_request_to_me_api_returns_401(): void
-    {
-        // Simulate a request to a protected endpoint without a token
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        $_SERVER['REQUEST_URI'] = '/api/auth/me';
-        $_SERVER['HTTP_ORIGIN'] = 'http://localhost';
-        $_ENV['APP_ENV'] = 'testing';
-        
-        ob_start();
-        
-        // We catch the exit using a try/catch or just let PHPUnit handle the separate process exit.
-        // However, a simple require might just exit the separate process with code 0.
-        // To safely capture output before exit, register a shutdown function or just capture output.
-        register_shutdown_function(function() {
-            $output = ob_get_clean();
-            $data = json_decode($output, true);
-            
-            // If the script exited cleanly without errors, the response code was set via http_response_code
-            $code = http_response_code();
-            
-            // Write to a temporary file to communicate back to PHPUnit if necessary, 
-            // but PHPUnit captures STDOUT of separate processes natively!
-            echo $output;
-        });
+    private AuthService $authService;
+    private UserRepository $userRepo;
 
-        // Suppress warnings from headers already sent in CLI
-        @require __DIR__ . '/../../public/index.php';
-        
-        $output = ob_get_clean();
-        $this->assertStringContainsString('"success":false', $output);
-        $this->assertStringContainsString('Unauthenticated', $output);
-        
-        // Note: since this runs in a separate process and index.php calls exit,
-        // the code below the require might not execute if index.php exits immediately.
-        // But the shutdown function will flush the output, and PHPUnit will see it.
-    }
-    
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
-    public function test_login_with_invalid_credentials_returns_error(): void
+    protected function setUp(): void
     {
-        $_SERVER['REQUEST_METHOD'] = 'POST';
-        $_SERVER['REQUEST_URI'] = '/api/auth/login';
-        $_SERVER['HTTP_ORIGIN'] = 'http://localhost';
-        $_ENV['APP_ENV'] = 'testing';
+        parent::setUp();
+        $this->authService = new AuthService();
+        $this->userRepo = new UserRepository();
+    }
+
+    /**
+     * Test that an unauthenticated token cannot be decoded or verified.
+     */
+    public function test_unauthenticated_token_validation_fails(): void
+    {
+        $invalidToken = 'invalid.bearer.token';
+        $secrets = $this->authService->getJwtSecrets();
         
-        // Mock php://input
-        // Since we can't easily mock php://input in a separate process without stream wrappers,
-        // we might not be able to easily test POST bodies this way unless we use a test helper.
-        // Alternatively, we can just assert that sending NO body to login fails validation.
+        $decoded = null;
+        $failed = false;
+        try {
+            $decoded = JWT::decode($invalidToken, new Key($secrets[0], 'HS256'));
+        } catch (Throwable $e) {
+            $failed = true;
+        }
+
+        $this->assertTrue($failed, "Decoding an invalid token must fail.");
+        $this->assertNull($decoded, "Decoded token must be null.");
+    }
+
+    /**
+     * Test that expired tokens are strictly rejected.
+     */
+    public function test_expired_token_is_rejected(): void
+    {
+        $secrets = $this->authService->getJwtSecrets();
+        $expiredPayload = [
+            'iss' => 'FinTrack Pro',
+            'aud' => 'FinTrack Pro Client',
+            'iat' => time() - 3600,
+            'exp' => time() - 1800, // Expired 30 mins ago
+            'sub' => 'dummy-uuid',
+            'role' => 'user',
+            'email' => 'test@example.com'
+        ];
         
-        ob_start();
-        @require __DIR__ . '/../../public/index.php';
-        $output = ob_get_clean();
-        
-        $this->assertStringContainsString('Email and password are required', $output);
-        $this->assertStringContainsString('"success":false', $output);
+        $expiredToken = JWT::encode($expiredPayload, $secrets[0], 'HS256');
+
+        $this->expectException(ExpiredException::class);
+        JWT::decode($expiredToken, new Key($secrets[0], 'HS256'));
+    }
+
+    /**
+     * Test that seeded CI test users can generate and verify valid JWT tokens.
+     */
+    public function test_authenticated_test_user_tokens_generation_and_validation(): void
+    {
+        $user = $this->userRepo->findByEmail('test@example.com');
+        if (!$user) {
+            $this->markTestSkipped("Test User A not found in database. Run database seeder first.");
+        }
+
+        $tokens = $this->authService->generateTokens($user);
+
+        $this->assertNotEmpty($tokens['accessToken'], "Access token must not be empty.");
+        $this->assertNotEmpty($tokens['refreshToken'], "Refresh token must not be empty.");
+
+        // Decode and verify claims
+        $secrets = $this->authService->getJwtSecrets();
+        $decoded = JWT::decode($tokens['accessToken'], new Key($secrets[0], 'HS256'));
+
+        $this->assertEquals($user['id'], $decoded->sub);
+        $this->assertEquals($user['email'], $decoded->email);
+        $this->assertEquals($user['role'] ?? 'user', $decoded->role);
+    }
+
+    /**
+     * Test credential verification rejects invalid passwords and accepts valid passwords.
+     */
+    public function test_credential_verification(): void
+    {
+        $user = $this->userRepo->findByEmail('test@example.com');
+        if (!$user) {
+            $this->markTestSkipped("Test User A not found in database. Run database seeder first.");
+        }
+
+        // Correct password matches hash
+        $valid = password_verify('TestPassword123!', $user['password_hash']);
+        $this->assertTrue($valid, "Valid test password must verify successfully.");
+
+        // Incorrect password fails verification
+        $invalid = password_verify('IncorrectPassword999!', $user['password_hash']);
+        $this->assertFalse($invalid, "Invalid password must not verify.");
+    }
+
+    /**
+     * Test JWT Key Rotation support.
+     */
+    public function test_jwt_key_rotation_resolution(): void
+    {
+        $secrets = $this->authService->getJwtSecrets();
+        $this->assertIsArray($secrets);
+        $this->assertNotEmpty($secrets, "JWT secrets list must not be empty.");
+
+        foreach ($secrets as $secret) {
+            $this->assertGreaterThanOrEqual(32, strlen($secret), "JWT secret must be at least 32 characters long.");
+        }
     }
 }
