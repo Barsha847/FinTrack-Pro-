@@ -96,8 +96,8 @@ function renderTable() {
 
   // Apply filters
   let filtered = incomesList.filter(item => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          item.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCat = selectedCategory === 'all' || item.category === selectedCategory;
     return matchesSearch && matchesCat;
   });
@@ -122,8 +122,8 @@ function renderTable() {
   if (prevBtn) prevBtn.disabled = currentPage === 1;
   if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   if (infoSpan) {
-    infoSpan.textContent = totalItems > 0 
-      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items` 
+    infoSpan.textContent = totalItems > 0
+      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items`
       : 'Showing 0-0 of 0 items';
   }
 
@@ -150,7 +150,7 @@ function renderTable() {
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid var(--border-color)';
     tr.style.transition = 'background-color var(--motion-hover)';
-    
+
     // Action event listeners
     tr.innerHTML = `
       <td style="padding: 1rem 1.25rem; font-weight: 500; color: var(--text-secondary);">${item.date}</td>
@@ -289,7 +289,7 @@ function setupEventListeners() {
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
       const id = document.getElementById('txId').value;
       const title = document.getElementById('txTitle').value.trim();
       const amount = parseFloat(document.getElementById('txAmount').value);
@@ -359,7 +359,7 @@ function deleteIncome(id) {
 }
 
 function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({
       '&': '&amp;',
       '<': '&lt;',

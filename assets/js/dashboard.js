@@ -41,7 +41,7 @@ export function initDashboard() {
   if (!isDashboardPage) return;
 
   console.warn("Initializing FinTrack Pro Dashboard (Phase 2)...");
-  
+
   loadDashboardState();
   setupDropdowns();
   setupSearch();
@@ -49,7 +49,7 @@ export function initDashboard() {
   setupAddTransactionModal();
   setupDeveloperToggles();
   setupChartTooltip();
-  
+
   // Initial render
   recalculateTotals();
   renderDashboard();
@@ -137,7 +137,7 @@ function renderTransactionsList() {
   // Apply filters
   const filtered = DashboardState.transactions.filter(tx => {
     return tx.title.toLowerCase().includes(DashboardState.searchQuery.toLowerCase()) ||
-           tx.category.toLowerCase().includes(DashboardState.searchQuery.toLowerCase());
+      tx.category.toLowerCase().includes(DashboardState.searchQuery.toLowerCase());
   });
 
   // Handle Empty State
@@ -150,12 +150,12 @@ function renderTransactionsList() {
   filtered.forEach(tx => {
     const item = document.createElement('div');
     item.className = 'transaction-feed-item';
-    
+
     // Choose Category Icon
     let iconName = 'arrow-up-right';
     let iconBg = 'var(--color-danger-light)';
     let iconColor = 'var(--color-danger)';
-    
+
     if (tx.type === 'income') {
       iconName = 'arrow-down-left';
       iconBg = 'var(--color-success-light)';
@@ -200,13 +200,13 @@ function renderNotificationsList() {
 function renderBudgetBars() {
   const savingsProgressEl = document.getElementById('savingsGoalProgress');
   const savingsPctText = document.getElementById('savingsGoalPct');
-  
+
   // Example dynamic rendering values
   if (savingsProgressEl) {
     const balance = DashboardState.totals.balance;
     const target = 580000.00;
     const progress = Math.min((balance / target) * 100, 100);
-    
+
     savingsProgressEl.style.width = `${progress}%`;
     if (savingsPctText) {
       savingsPctText.textContent = `${Math.round(progress)}% Complete`;
@@ -291,12 +291,12 @@ function setupAddTransactionModal() {
   const closeBtn = document.getElementById('closeModalBtn');
   const cancelBtn = document.getElementById('cancelModalBtn');
   const form = document.getElementById('addTransactionForm');
-  
+
   if (!modal || !openBtn) return;
 
   const openModal = () => {
     modal.classList.add('show');
-    
+
     // Set initial focus
     const firstInput = document.getElementById('txTitle');
     if (firstInput) {
@@ -325,7 +325,7 @@ function setupAddTransactionModal() {
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
       const title = document.getElementById('txTitle').value.trim();
       const amount = parseFloat(document.getElementById('txAmount').value);
       const type = document.getElementById('txType').value;
@@ -349,12 +349,12 @@ function setupAddTransactionModal() {
 
       DashboardState.transactions.unshift(newTx); // Add to beginning of array
       saveTransactionsToStorage();
-      
+
       // Update UI
       recalculateTotals();
       renderDashboard();
       closeModal();
-      
+
       showToast(`Transaction "${title}" logged successfully.`, "success", "Transaction Created");
     });
   }
@@ -416,7 +416,7 @@ function setupDeveloperToggles() {
 function createEmptyStateMarkup() {
   const el = document.createElement('div');
   el.className = 'empty-state-container reveal';
-  
+
   el.innerHTML = `
     <svg class="empty-state-svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5h.007v.008H3.75V4.5zm.007 2.25h.008v.008H3.75V6.75zm.007 2.25h.008v.008H3.75V9zm.007 2.25h.008v.008H3.75V11.25zm.007 2.25h.008v.008H3.75V13.5zm.007 2.25h.008v.008H3.75V15.75zM12 5.25h.007v.008H12V5.25zm.007 2.25h.008v.008H12V7.5zm.007 2.25h.008v.008H12V9.75zm.007 2.25h.008v.008H12v-.008zm.007 2.25h.008v.008H12V14.25zm.007 2.25h.008v.008H12V16.5zm-5.617-10.74h.007v.008H6.383v-.008zm.007 2.25h.008v.008H6.383V8.01zm.007 2.25h.008v.008H6.383V10.26zm.007 2.25h.008v.008H6.383v-.008zm.007 2.25h.008v.008H6.383v-.008zm20.25 2.25h.008v.008H21v-.008z" />
@@ -433,7 +433,7 @@ function createEmptyStateMarkup() {
 
 // Utility helper to sanitize output strings
 function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -494,7 +494,7 @@ function setupChartTooltip() {
       const rect = e.currentTarget.getBoundingClientRect();
       const offsetParent = tooltip.offsetParent || e.currentTarget.closest('.card-glass') || document.body;
       const parentRect = offsetParent.getBoundingClientRect();
-      
+
       // Calculate top and left positions relative to parent container
       let top = rect.top - parentRect.top - tooltip.offsetHeight - 12;
       let left = rect.left - parentRect.left + rect.width / 2 - tooltip.offsetWidth / 2;

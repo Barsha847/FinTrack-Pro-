@@ -85,8 +85,8 @@ function renderTable() {
   if (prevBtn) prevBtn.disabled = currentPage === 1;
   if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   if (infoSpan) {
-    infoSpan.textContent = totalItems > 0 
-      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items` 
+    infoSpan.textContent = totalItems > 0
+      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items`
       : 'Showing 0-0 of 0 items';
   }
 
@@ -218,7 +218,7 @@ function setupEventListeners() {
   if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      
+
       const id = document.getElementById('goalId').value;
       const name = document.getElementById('goalName').value.trim();
       const target = parseFloat(document.getElementById('goalTarget').value);
@@ -285,7 +285,7 @@ function deleteGoal(id) {
 }
 
 function escapeHTML(str) {
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({
       '&': '&amp;',
       '<': '&lt;',

@@ -8,7 +8,7 @@ test.describe('Authentication Regression', () => {
     });
 
     test('valid user can login and see dashboard', async ({ page }) => {
-        await page.goto('/pages/login.html', { waitUntil: 'domcontentloaded' });
+        await page.goto('/pages/login.html', { waitUntil: 'load' });
         await page.fill('#loginEmail, #email, input[name="email"]', 'test@example.com');
         await page.fill('#loginPassword, #password, input[name="password"]', 'TestPassword123!');
         await page.click('button[type="submit"]');
@@ -18,7 +18,7 @@ test.describe('Authentication Regression', () => {
     });
 
     test('invalid user sees error message', async ({ page }) => {
-        await page.goto('/pages/login.html', { waitUntil: 'domcontentloaded' });
+        await page.goto('/pages/login.html', { waitUntil: 'load' });
         await page.fill('#loginEmail, #email, input[name="email"]', 'wrong@example.com');
         await page.fill('#loginPassword, #password, input[name="password"]', 'Wrong123!');
         await page.click('button[type="submit"]');

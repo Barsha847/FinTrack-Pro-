@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log In — FinTrack Pro</title>
   <meta name="description" content="Access your FinTrack Pro dashboard securely.">
-  
+
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/dark-theme.css">
@@ -19,6 +20,7 @@
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
 
   <!-- ==========================================
@@ -57,16 +59,18 @@
 
       <div class="card-glass">
         <h3 style="font-weight: 700; text-align: center; margin-bottom: 0.5rem;">Welcome Back</h3>
-        <p style="text-align: center; font-size: var(--fs-sm); margin-bottom: 2rem;">Access your dashboard and reports</p>
-        
+        <p style="text-align: center; font-size: var(--fs-sm); margin-bottom: 2rem;">Access your dashboard and reports
+        </p>
+
         <form id="loginForm" method="POST" action="dashboard.html" novalidate>
-          
+
           <!-- Email Input -->
           <div class="form-group">
             <label class="form-label" for="loginEmail">Email Address</label>
             <div class="form-control-wrapper">
               <i data-lucide="mail"></i>
-              <input type="email" id="loginEmail" name="email" class="form-control has-icon" placeholder="name@domain.com" required>
+              <input type="email" id="loginEmail" name="email" class="form-control has-icon"
+                placeholder="name@domain.com" required>
             </div>
             <div class="error-message"></div>
           </div>
@@ -79,7 +83,8 @@
             </div>
             <div class="form-control-wrapper">
               <i data-lucide="lock"></i>
-              <input type="password" id="loginPassword" name="password" class="form-control has-icon has-suffix" placeholder="••••••••" required>
+              <input type="password" id="loginPassword" name="password" class="form-control has-icon has-suffix"
+                placeholder="••••••••" required>
               <button type="button" class="form-suffix-btn password-toggle-btn" aria-label="Toggle password visibility">
                 <i data-lucide="eye"></i>
               </button>
@@ -111,4 +116,5 @@
   <!-- Entry Script -->
   <script type="module" src="../assets/js/app.js"></script>
 </body>
+
 </html>

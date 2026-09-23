@@ -95,8 +95,8 @@ function renderTable() {
   tbody.innerHTML = '';
 
   let filtered = billsList.filter(item => {
-    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-           item.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -116,8 +116,8 @@ function renderTable() {
   if (prevBtn) prevBtn.disabled = currentPage === 1;
   if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   if (infoSpan) {
-    infoSpan.textContent = totalItems > 0 
-      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items` 
+    infoSpan.textContent = totalItems > 0
+      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items`
       : 'Showing 0-0 of 0 items';
   }
 
@@ -148,12 +148,12 @@ function renderTable() {
     if (item.status === 'overdue') statusClass = 'badge-danger';
 
     const isPaid = item.status === 'paid';
-    const payBtnHtml = isPaid 
+    const payBtnHtml = isPaid
       ? `<button class="btn btn-secondary btn-sm" disabled style="padding: 0.25rem 0.5rem; height: auto; opacity: 0.5;"><i data-lucide="check" style="width: 12px; height: 12px; color: var(--color-success);"></i></button>`
       : `<button class="btn btn-primary btn-sm pay-bill-btn" data-id="${item.id}" style="padding: 0.25rem 0.5rem; height: auto; font-size: 10px;">Pay Now</button>`;
 
     // Recurrence pill info
-    const recurrenceHtml = item.is_recurring 
+    const recurrenceHtml = item.is_recurring
       ? `<span class="badge badge-warning" style="text-transform: capitalize; font-size: 9px;">${item.recurring_frequency}</span>`
       : `<span class="badge badge-secondary" style="font-size: 9px; opacity: 0.6;">One-Time</span>`;
 
@@ -287,14 +287,14 @@ function setupEventListeners() {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const id = document.getElementById('billId').value;
       const name = document.getElementById('billName').value.trim();
       const amount = parseFloat(document.getElementById('billAmount').value);
       const category = document.getElementById('billCategory').value;
       const date = document.getElementById('billDate').value;
       const status = document.getElementById('billStatus').value;
-      
+
       const isRecurring = recurringCheckbox ? recurringCheckbox.checked : false;
       const recurringFrequency = isRecurring ? document.getElementById('billFrequency').value : null;
       const leadDays = parseInt(document.getElementById('billLeadDays').value || 3);
@@ -358,7 +358,7 @@ function openEditModal(id) {
   document.getElementById('billCategory').value = item.category;
   document.getElementById('billDate').value = item.date;
   document.getElementById('billStatus').value = item.status;
-  
+
   const recurringCheckbox = document.getElementById('billRecurring');
   const frequencySelect = document.getElementById('billFrequency');
   const frequencyGroup = document.getElementById('billFrequencyGroup');

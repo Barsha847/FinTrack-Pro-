@@ -1,0 +1,290 @@
+/* FinTrack Pro - Landing Page CSS (Aggressive Motion Layout) */
+
+/* Core Layout Additions */
+body {
+  overflow-x: hidden;
+}
+
+.gsap-layer {
+  position: relative;
+  width: 100%;
+}
+
+/* Horizontal Typography */
+.scroll-text-container {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100vw;
+  position: relative;
+  padding: 4rem 0;
+  display: flex;
+  align-items: center;
+}
+
+.scroll-text {
+  font-family: var(--font-display);
+  font-size: clamp(6rem, 15vw, 12rem);
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 2px var(--border-color);
+  text-transform: uppercase;
+  line-height: 1;
+  display: inline-block;
+  will-change: transform;
+}
+
+.scroll-text span {
+  color: var(--text-primary);
+  -webkit-text-stroke: 0;
+}
+
+[data-theme="dark"] .scroll-text {
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.1);
+}
+
+/* Hero Modifications */
+.hero-wrapper {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding-top: var(--navbar-height);
+  perspective: 1000px;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-back);
+}
+
+.hero-blob {
+  position: absolute;
+  border-radius: var(--radius-full);
+  filter: blur(80px);
+  opacity: 0; /* GSAP reveals */
+  will-change: transform;
+}
+
+.hero-blob.b1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, var(--color-primary-start), rgba(139, 92, 246, 0.2));
+  top: -100px;
+  right: -100px;
+}
+
+.hero-blob.b2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #ec4899, rgba(236, 72, 153, 0.15));
+  bottom: -200px;
+  left: -100px;
+}
+
+.hero-glass-card {
+  position: absolute;
+  backdrop-filter: var(--bg-glass-blur);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
+  padding: 1.5rem;
+  opacity: 0; /* GSAP reveals */
+  z-index: 5;
+  will-change: transform;
+}
+
+.hero-glass-1 { right: 5%; top: 20%; width: 280px; transform: rotate(5deg); }
+.hero-glass-2 { left: 10%; bottom: 15%; width: 220px; transform: rotate(-5deg); }
+
+/* Feature Cards 3D */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  perspective: 1500px;
+}
+
+.feature-3d-card {
+  transform-style: preserve-3d;
+  position: relative;
+  height: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  opacity: 0; /* GSAP */
+  will-change: transform;
+  transition: box-shadow var(--motion-hover);
+}
+
+.feature-3d-card:hover {
+  box-shadow: var(--shadow-xl);
+}
+
+.feature-3d-card .icon-layer {
+  transform: translateZ(40px);
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: var(--shadow-glow);
+  will-change: transform;
+}
+
+.feature-3d-card .content-layer {
+  transform: translateZ(20px);
+  will-change: transform;
+}
+
+/* Financial Journey Line */
+.journey-container {
+  position: relative;
+  padding: 4rem 0;
+}
+
+.journey-path-svg {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 4px;
+  z-index: 0;
+}
+
+.journey-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4rem;
+  opacity: 0; /* GSAP */
+  will-change: transform;
+}
+
+.journey-node:nth-child(even) {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.journey-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 4px solid var(--bg-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+  margin: 0 2rem;
+}
+
+.journey-content {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 2rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.journey-empty {
+  flex: 1;
+}
+
+/* Product Showcase Parallax */
+.showcase-wrapper {
+  position: relative;
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end));
+  padding: 4rem 2rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.showcase-bg-elements {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.showcase-bg-elements .circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  will-change: transform;
+}
+
+.showcase-mockup {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 900px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.2);
+  background: var(--bg-primary);
+  opacity: 0; /* GSAP */
+  will-change: transform;
+}
+
+/* Large CTA */
+.cta-aggressive {
+  position: relative;
+  padding: 8rem 0;
+  text-align: center;
+  overflow: hidden;
+}
+
+.cta-aggressive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--color-primary-light) 0%, transparent 70%);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.cta-aggressive h2 {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  line-height: 1.1;
+  margin-bottom: 2rem;
+  font-weight: 800;
+  opacity: 0; /* GSAP */
+}
+
+.cta-buttons {
+  opacity: 0; /* GSAP */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-glass-card { display: none; }
+  .journey-node, .journey-node:nth-child(even) {
+    flex-direction: column;
+    text-align: left;
+  }
+  .journey-dot {
+    margin: 1rem 0;
+  }
+  .journey-empty {
+    display: none;
+  }
+  .feature-3d-card {
+    transform: none !important;
+  }
+}

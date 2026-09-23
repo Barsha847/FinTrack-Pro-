@@ -63,7 +63,7 @@ function renderMetrics() {
 
   if (portfolioEl) portfolioEl.textContent = '₹' + totalCurrent.toLocaleString('en-IN', { minimumFractionDigits: 2 });
   if (investedEl) investedEl.textContent = '₹' + totalInvested.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-  
+
   if (profitEl) {
     profitEl.textContent = (netProfit >= 0 ? '+' : '') + '₹' + netProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 });
     profitEl.className = netProfit >= 0 ? 'stats-value text-success' : 'stats-value text-danger';
@@ -90,9 +90,9 @@ function renderTable() {
   };
 
   let filtered = investmentsList.filter(item => {
-    const matchesSearch = (item.asset_name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (item.asset_type || '').toLowerCase().includes(searchQuery.toLowerCase());
-    
+    const matchesSearch = (item.asset_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (item.asset_type || '').toLowerCase().includes(searchQuery.toLowerCase());
+
     const dbCat = item.asset_type;
     const filterCat = reverseMap[dbCat] || dbCat;
     const matchesCat = selectedCategory === 'all' || filterCat === selectedCategory;
@@ -114,8 +114,8 @@ function renderTable() {
   if (prevBtn) prevBtn.disabled = currentPage === 1;
   if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   if (infoSpan) {
-    infoSpan.textContent = totalItems > 0 
-      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items` 
+    infoSpan.textContent = totalItems > 0
+      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items`
       : 'Showing 0-0 of 0 items';
   }
 
@@ -272,7 +272,7 @@ function setupEventListeners() {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const id = document.getElementById('assetId').value;
       const name = document.getElementById('assetName').value.trim();
       const category = document.getElementById('assetCategory').value;
@@ -372,7 +372,7 @@ async function deleteAsset(id) {
 
 function escapeHTML(str) {
   if (!str) return '';
-  return str.replace(/[&<>'"]/g, 
+  return str.replace(/[&<>'"]/g,
     tag => ({
       '&': '&amp;',
       '<': '&lt;',

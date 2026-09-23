@@ -31,11 +31,11 @@ export function getRoutePath(routeName) {
   const inPagesFolder = window.location.pathname.includes('/pages/');
   const filename = ROUTES[routeName];
   if (!filename) return '#';
-  
+
   if (routeName === 'landing') {
     return inPagesFolder ? '../index.html' : 'index.html';
   }
-  
+
   return inPagesFolder ? filename : `pages/${filename}`;
 }
 
@@ -48,7 +48,7 @@ export function getRoutePath(routeName) {
  */
 export function showToast(message, type = 'info', title = 'Notification', duration = 4000) {
   let container = document.querySelector('.toast-container');
-  
+
   // Create container if it doesn't exist
   if (!container) {
     container = document.createElement('div');
@@ -59,7 +59,7 @@ export function showToast(message, type = 'info', title = 'Notification', durati
   // Create toast card element
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
-  
+
   // Set corresponding Lucide icon
   let iconName = 'info';
   if (type === 'success') iconName = 'check-circle';
@@ -76,7 +76,7 @@ export function showToast(message, type = 'info', title = 'Notification', durati
   `;
 
   container.appendChild(toast);
-  
+
   // Render Lucide icons
   if (window.lucide) window.lucide.createIcons();
 
@@ -114,7 +114,7 @@ export function initRipples() {
     // Create ripple circle
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
-    
+
     // Position ripple relative to button
     const rect = btn.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height);
@@ -207,7 +207,7 @@ export function syncUserProfile() {
   if (dropdownEmail) dropdownEmail.textContent = email;
 
   const headerAvatars = document.querySelectorAll('#profileTriggerBtn .avatar, #profileDropdown .avatar');
-    headerAvatars.forEach(el => {
+  headerAvatars.forEach(el => {
     el.textContent = initials;
   });
 }
@@ -303,7 +303,7 @@ export function initGlobalNotifications() {
       list.forEach(notif => {
         const item = document.createElement('div');
         item.className = `notification-item ${!notif.is_read ? 'unread' : ''}`;
-        
+
         let iconName = 'info';
         let iconBg = 'var(--color-primary-light)';
         let iconColor = 'var(--color-primary)';
@@ -391,7 +391,7 @@ function onRefreshed() {
 
 export async function fetchApi(url, options = {}) {
   options.headers = options.headers || {};
-  
+
   if (!(options.body instanceof FormData) && !options.headers['Content-Type']) {
     options.headers['Content-Type'] = 'application/json';
   }
@@ -406,15 +406,11 @@ export async function fetchApi(url, options = {}) {
 
   options.credentials = 'include';
 
-  // Support accessing backend from standard front-end Live Server port 5500 if used
   let targetUrl = url;
-  if (window.location.port === '5500' && url.startsWith('/api/')) {
-    targetUrl = 'http://localhost:8000' + url;
-  }
 
   try {
     const response = await fetch(targetUrl, options);
-    
+
     if (response.status === 401) {
       // Don't refresh on login or refresh itself
       if (url.includes('/api/auth/login') || url.includes('/api/auth/refresh')) {
@@ -430,12 +426,12 @@ export async function fetchApi(url, options = {}) {
       if (!isRefreshing) {
         isRefreshing = true;
         try {
-          const refreshUrl = window.location.port === '5500' ? 'http://localhost:8000/api/auth/refresh' : '/api/auth/refresh';
+          const refreshUrl = '/api/auth/refresh';
           const refreshResponse = await fetch(refreshUrl, {
             method: 'POST',
             credentials: 'include'
           });
-          
+
           if (refreshResponse.ok) {
             const refreshResult = await refreshResponse.json();
             if (refreshResult.success) {
@@ -456,7 +452,7 @@ export async function fetchApi(url, options = {}) {
           // Refresh failed - force logout
           sessionStorage.clear();
           localStorage.clear();
-          
+
           const path = window.location.pathname;
           const unprotectedKeywords = [
             'login.html',
@@ -496,7 +492,7 @@ export async function fetchApi(url, options = {}) {
         });
       });
     }
-    
+
     return response;
   } catch (err) {
     console.error("Fetch API failure:", err);
@@ -509,7 +505,7 @@ export async function fetchApi(url, options = {}) {
  */
 export function initGlobalModalManager() {
   const focusableSelectors = 'input, select, textarea, button, [tabindex="0"]';
-  
+
   const handleKeyDown = (e) => {
     const openModal = document.querySelector('.modal-backdrop.show');
     if (!openModal) return;
@@ -522,7 +518,7 @@ export function initGlobalModalManager() {
     if (e.key === 'Tab') {
       const focusables = Array.from(openModal.querySelectorAll(focusableSelectors))
         .filter(el => el.tabIndex >= 0 && !el.disabled && el.offsetParent !== null);
-      
+
       if (focusables.length === 0) return;
 
       const firstFocusable = focusables[0];
@@ -563,7 +559,7 @@ export function initGlobalModalManager() {
  */
 export async function checkPageAuth() {
   const path = window.location.pathname;
-  
+
   const unprotectedKeywords = [
     'login.html',
     'signup.html',
@@ -575,19 +571,19 @@ export async function checkPageAuth() {
     '404.html',
     '500.html'
   ];
-  
+
   const isLanding = !path.includes('/pages/') && (path.endsWith('/') || path.endsWith('index.html') || path.endsWith('FinTrack%20Pro/') || path.endsWith('FinTrack-Pro-/'));
   const isUnprotected = isLanding || unprotectedKeywords.some(keyword => path.includes(keyword));
-  
+
   if (isUnprotected) {
     return;
   }
-  
+
   try {
     // Before every page loads: Call: GET /api/auth/me
     const response = await fetchApi('/api/auth/me');
     if (!response) return; // fetchApi redirects to login on 401
-    
+
     const result = await response.json();
     if (!result || !result.success || !result.data || !result.data.user) {
       sessionStorage.clear();

@@ -121,8 +121,8 @@ function renderTable() {
   if (prevBtn) prevBtn.disabled = currentPage === 1;
   if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   if (infoSpan) {
-    infoSpan.textContent = totalItems > 0 
-      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items` 
+    infoSpan.textContent = totalItems > 0
+      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items`
       : 'Showing 0-0 of 0 items';
   }
 
@@ -146,7 +146,7 @@ function renderTable() {
   paginated.forEach(item => {
     const ratio = Math.min((item.spent / item.limit) * 100, 100);
     const ratioRounded = Math.round((item.spent / item.limit) * 100);
-    
+
     // Choose status colors
     let barColor = 'linear-gradient(135deg, var(--color-primary-start), var(--color-primary-end))';
     let textClass = 'text-primary';
@@ -268,7 +268,7 @@ function setupEventListeners() {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const id = document.getElementById('budgetId').value;
       const categoryId = document.getElementById('budgetCategory').value;
       const limit = parseFloat(document.getElementById('budgetLimit').value);

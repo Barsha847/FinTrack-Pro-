@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Savings Goals — FinTrack Pro</title>
   <meta name="description" content="Set and monitor long-term savings goals.">
-  
+
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/dark-theme.css">
@@ -20,13 +21,16 @@
 
   <style>
     @media (max-width: 1024px) {
-      #mobileSidebarToggle { display: flex !important; }
+      #mobileSidebarToggle {
+        display: flex !important;
+      }
     }
   </style>
 
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
 
   <!-- PRELOADER -->
@@ -37,7 +41,7 @@
 
   <!-- Main Layout Wrapper -->
   <div class="dashboard-layout savings-page-layout">
-    
+
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-header">
@@ -106,17 +110,19 @@
           <span class="sidebar-profile-name">John Doe</span>
           <span class="sidebar-profile-email">john.doe@example.com</span>
         </div>
-        <button class="sidebar-logout-btn" id="sidebarLogout" aria-label="Log Out"><i data-lucide="log-out"></i></button>
+        <button class="sidebar-logout-btn" id="sidebarLogout" aria-label="Log Out"><i
+            data-lucide="log-out"></i></button>
       </div>
     </aside>
 
     <!-- CONTENT CONTAINER -->
     <main class="dashboard-main">
-      
+
       <!-- HEADER -->
       <header class="dashboard-header">
         <div class="d-flex align-center gap-3" style="flex: 1;">
-          <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;" aria-label="Open Sidebar Drawer">
+          <button class="mobile-menu-toggle" id="mobileSidebarToggle" style="display: none;"
+            aria-label="Open Sidebar Drawer">
             <i data-lucide="menu"></i>
           </button>
           <div class="search-bar-container">
@@ -124,14 +130,15 @@
             <i data-lucide="search"></i>
           </div>
         </div>
-        
+
         <div class="d-flex align-center gap-3">
           <button class="theme-toggle-btn" id="pageRefreshBtn" aria-label="Refresh Data">
             <i data-lucide="refresh-cw"></i>
           </button>
-          
+
           <div class="dropdown-wrapper">
-            <button class="theme-toggle-btn notification-trigger" id="notificationTriggerBtn" aria-label="Notifications">
+            <button class="theme-toggle-btn notification-trigger" id="notificationTriggerBtn"
+              aria-label="Notifications">
               <i data-lucide="bell"></i>
               <span class="notification-badge-dot" id="notificationBadgeDot" style="display: none;"></span>
             </button>
@@ -142,14 +149,15 @@
               <div class="notification-list" id="notificationsContainer"></div>
             </div>
           </div>
-          
+
           <button class="theme-toggle-btn theme-toggle-trigger-btn" aria-label="Toggle Theme">
             <i data-lucide="moon" class="moon-icon"></i>
             <i data-lucide="sun" class="sun-icon"></i>
           </button>
           <!-- Profile -->
           <div class="dropdown-wrapper" style="border-left: 1px solid var(--border-color); padding-left: 1rem;">
-            <div class="d-flex align-center gap-2 profile-dropdown-trigger user-menu-btn" id="profileTriggerBtn" style="cursor: pointer; user-select: none;">
+            <div class="d-flex align-center gap-2 profile-dropdown-trigger user-menu-btn" id="profileTriggerBtn"
+              style="cursor: pointer; user-select: none;">
               <div class="avatar" style="width: 36px; height: 36px;">JD</div>
               <div class="d-none d-md-flex flex-column">
                 <span style="font-size: var(--fs-sm); font-weight: 700; line-height: 1;">John Doe</span>
@@ -158,8 +166,10 @@
             </div>
             <div class="dropdown-menu profile-menu" id="profileDropdown" style="width: 200px;">
               <div class="profile-menu-links">
-                <a href="profile.html" class="profile-menu-link"><i data-lucide="user" style="width: 16px; height: 16px;"></i> Profile</a>
-                <a href="login.html" class="profile-menu-link logout" id="logoutBtn"><i data-lucide="log-out" style="width: 16px; height: 16px;"></i> Log Out</a>
+                <a href="profile.html" class="profile-menu-link"><i data-lucide="user"
+                    style="width: 16px; height: 16px;"></i> Profile</a>
+                <a href="login.html" class="profile-menu-link logout" id="logoutBtn"><i data-lucide="log-out"
+                    style="width: 16px; height: 16px;"></i> Log Out</a>
               </div>
             </div>
           </div>
@@ -168,14 +178,16 @@
 
       <!-- METRICS & TABLES -->
       <div class="dashboard-content reveal">
-        
+
         <!-- ROW 1: STAT CARDS -->
         <div class="grid-12" style="margin-bottom: 2rem;">
           <div class="col-12 col-md-6 col-xl-3">
             <div class="card-glass card-stats">
               <div class="stats-header">
                 <span>Active Goals</span>
-                <div class="stats-icon-wrapper" style="background-color: var(--color-primary-light); color: var(--color-primary);"><i data-lucide="target"></i></div>
+                <div class="stats-icon-wrapper"
+                  style="background-color: var(--color-primary-light); color: var(--color-primary);"><i
+                    data-lucide="target"></i></div>
               </div>
               <div class="stats-value" id="activeGoalsVal">0 Goals</div>
               <div class="stats-change">Long-term targets</div>
@@ -197,7 +209,9 @@
             <div class="card-glass card-stats">
               <div class="stats-header">
                 <span>Total Stashed Value</span>
-                <div class="stats-icon-wrapper" style="background-color: var(--color-success-light); color: var(--color-success);"><i data-lucide="piggy-bank"></i></div>
+                <div class="stats-icon-wrapper"
+                  style="background-color: var(--color-success-light); color: var(--color-success);"><i
+                    data-lucide="piggy-bank"></i></div>
               </div>
               <div class="stats-value" id="savedAmountVal">₹0.00</div>
               <div class="stats-change text-success">Total saved amount</div>
@@ -208,7 +222,9 @@
             <div class="card-glass card-stats">
               <div class="stats-header">
                 <span>Overall Progression</span>
-                <div class="stats-icon-wrapper" style="background-color: var(--color-warning-light); color: var(--color-warning);"><i data-lucide="trending-up"></i></div>
+                <div class="stats-icon-wrapper"
+                  style="background-color: var(--color-warning-light); color: var(--color-warning);"><i
+                    data-lucide="trending-up"></i></div>
               </div>
               <div class="stats-value" id="overallSavingsPct">0%</div>
               <div class="stats-change text-warning">Average completion rate</div>
@@ -220,9 +236,10 @@
         <div class="grid-12">
           <div class="col-12">
             <div class="card-glass" style="padding: 1.5rem;">
-              
+
               <!-- Toolbar -->
-              <div class="d-flex justify-between align-center" style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+              <div class="d-flex justify-between align-center"
+                style="margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                 <div style="flex: 1;">
                   <h4 style="font-family: var(--font-display); font-weight: 700; margin: 0;">Savings Goals Ledger</h4>
                 </div>
@@ -232,14 +249,17 @@
               </div>
 
               <!-- Main Table Structure -->
-              <div style="width: 100%; overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: var(--fs-xs);" class="table-responsive">
+              <div
+                style="width: 100%; overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: var(--fs-xs);"
+                  class="table-responsive">
                   <thead>
                     <tr style="background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color);">
                       <th style="padding: 1rem 1.25rem; font-weight: 700;">Goal Name</th>
                       <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Target (INR)</th>
                       <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: right;">Saved (INR)</th>
-                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: center; width: 35%;">Progress Gauge</th>
+                      <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: center; width: 35%;">Progress
+                        Gauge</th>
                       <th style="padding: 1rem 1.25rem; font-weight: 700;">Target Date</th>
                       <th style="padding: 1rem 1.25rem; font-weight: 700; text-align: center;">Actions</th>
                     </tr>
@@ -252,7 +272,8 @@
 
               <!-- Pagination Footer -->
               <div class="d-flex justify-between align-center" style="margin-top: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-                <span style="font-size: var(--fs-xs); color: var(--text-muted);" id="paginationInfo">Showing 1-10 of 10 items</span>
+                <span style="font-size: var(--fs-xs); color: var(--text-muted);" id="paginationInfo">Showing 1-10 of 10
+                  items</span>
                 <div class="d-flex gap-2">
                   <button class="btn btn-secondary btn-sm" id="prevPageBtn" disabled>Previous</button>
                   <button class="btn btn-secondary btn-sm" id="nextPageBtn" disabled>Next</button>
@@ -282,7 +303,8 @@
             <label class="form-label" for="goalName">Goal Name</label>
             <div class="form-control-wrapper">
               <i data-lucide="edit-3"></i>
-              <input type="text" id="goalName" class="form-control has-icon" placeholder="e.g. New Macbook Pro" required>
+              <input type="text" id="goalName" class="form-control has-icon" placeholder="e.g. New Macbook Pro"
+                required>
             </div>
             <div class="error-message"></div>
           </div>
@@ -290,16 +312,20 @@
             <div class="col-12 col-md-6 form-group">
               <label class="form-label" for="goalTarget">Target (INR)</label>
               <div class="form-control-wrapper">
-                <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
-                <input type="number" id="goalTarget" class="form-control has-icon" placeholder="120000.00" step="0.01" min="0.01" required>
+                <i
+                  style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
+                <input type="number" id="goalTarget" class="form-control has-icon" placeholder="120000.00" step="0.01"
+                  min="0.01" required>
               </div>
               <div class="error-message"></div>
             </div>
             <div class="col-12 col-md-6 form-group">
               <label class="form-label" for="goalSaved">Currently Saved (INR)</label>
               <div class="form-control-wrapper">
-                <i style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
-                <input type="number" id="goalSaved" class="form-control has-icon" placeholder="10000.00" step="0.01" min="0.00" required>
+                <i
+                  style="left: 1rem; font-style: normal; font-weight: 700; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; justify-content: center;">₹</i>
+                <input type="number" id="goalSaved" class="form-control has-icon" placeholder="10000.00" step="0.01"
+                  min="0.00" required>
               </div>
               <div class="error-message"></div>
             </div>
@@ -324,4 +350,5 @@
   <!-- Entry Script -->
   <script type="module" src="../assets/js/app.js"></script>
 </body>
+
 </html>

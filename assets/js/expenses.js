@@ -103,7 +103,7 @@ function renderMetrics() {
 
   let totalSum = 0;
   let monthSum = 0;
-  
+
   const now = new Date();
   const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
@@ -144,8 +144,8 @@ function renderTable() {
   if (prevBtn) prevBtn.disabled = currentPage === 1;
   if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalItems === 0;
   if (infoSpan) {
-    infoSpan.textContent = totalItems > 0 
-      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items` 
+    infoSpan.textContent = totalItems > 0
+      ? `Showing ${startIdx + 1}-${endIdx} of ${totalItems} items`
       : 'Showing 0-0 of 0 items';
   }
 
@@ -170,7 +170,7 @@ function renderTable() {
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid var(--border-color)';
     tr.style.transition = 'background-color var(--motion-hover)';
-    
+
     let badgeClass = 'badge-primary';
     const lowerCat = item.category.toLowerCase();
     if (lowerCat === 'food' || lowerCat === 'groceries') badgeClass = 'badge-success';
@@ -282,10 +282,10 @@ function setupEventListeners() {
       document.getElementById('modalTitle').textContent = 'Add Expense Transaction';
       form.reset();
       document.getElementById('txId').value = '';
-      
+
       // Default to today's date
       document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-      
+
       modal.classList.add('show');
       setTimeout(() => document.getElementById('txTitle').focus(), 100);
     });
@@ -304,7 +304,7 @@ function setupEventListeners() {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const id = document.getElementById('txId').value;
       const title = document.getElementById('txTitle').value.trim();
       const amount = parseFloat(document.getElementById('txAmount').value);
